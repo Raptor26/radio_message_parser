@@ -1,0 +1,154 @@
+﻿---
+# BasedOnStyle: Mozilla
+Language: Cpp
+AlignAfterOpenBracket: AlwaysBreak
+
+AlignConsecutiveMacros:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: false
+
+AlignConsecutiveAssignments: 
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: false
+  AlignCompound: true
+  PadOperators: true
+
+AlignConsecutiveDeclarations: 'true'
+AlignEscapedNewlines: Left
+AlignOperands: AlignAfterOperator
+
+AlignTrailingComments: 'true'
+AlwaysBreakAfterDefinitionReturnType: All
+
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterEnum: true
+  AfterFunction: true
+  AfterStruct: true
+  SplitEmptyFunction: true
+  AfterClass: true
+  AfterObjCDeclaration: true
+
+AllowAllArgumentsOnNextLine: 'false'
+AllowShortEnumsOnASingleLine: 'false'
+AllowAllConstructorInitializersOnNextLine: 'true'
+AllowAllParametersOfDeclarationOnNextLine: 'false'
+AllowShortBlocksOnASingleLine: 'false'
+AllowShortCaseLabelsOnASingleLine: 'false'
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLambdasOnASingleLine: None
+AllowShortLoopsOnASingleLine: 'false'
+AlwaysBreakAfterReturnType: All
+AlwaysBreakBeforeMultilineStrings: 'true'
+AlwaysBreakTemplateDeclarations: 'Yes'
+BinPackArguments: 'false'
+BinPackParameters: 'false'
+BreakAfterJavaFieldAnnotations: 'true'
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeBraces: Allman
+BreakBeforeTernaryOperators: 'true'
+BreakConstructorInitializers: AfterColon
+BreakInheritanceList: AfterColon
+BreakStringLiterals: 'false'
+ColumnLimit: '80'
+CommentPragmas: '^ IWYU pragma:'
+CompactNamespaces: 'true'
+ConstructorInitializerAllOnOneLineOrOnePerLine: 'true'
+ContinuationIndentWidth: '4'
+Cpp11BracedListStyle: 'true'
+DerivePointerAlignment: 'false'
+FixNamespaceComments: 'true'
+IncludeBlocks:   Preserve
+# Regular expressions denoting the different #include categories used for ordering #includes.
+IncludeCategories:
+  - Regex:           '^"(llvm|llvm-c|clang|clang-c)/'
+    Priority:        2
+    SortPriority:    0
+    CaseSensitive:   false
+  - Regex:           '^(<|"(gtest|gmock|isl|json|catch2|cmocka)/)'
+    Priority:        3
+    SortPriority:    0
+    CaseSensitive:   false
+  - Regex:           '.*'
+    Priority:        1
+    SortPriority:    0
+    CaseSensitive:   false
+# Specify a regular expression of suffixes that are allowed in the file-to-main-include mapping.
+# use this regex of allowed suffixes to the header stem.
+# A partial match is done, so that: - “” means “arbitrary suffix” - “$” means “no suffix”
+IncludeIsMainRegex: '$'
+# Specify a regular expression for files being formatted that are allowed to be considered
+# “main” in the file-to-main-include mapping.
+IncludeIsMainSourceRegex: ''
+# access modifiers are indented (or outdented) relative to the record members,
+# respecting the AccessModifierOffset
+# IndentAccessModifiers: false
+
+ReferenceAlignment: Right
+SpaceAroundPointerQualifiers: After
+
+SpaceBeforeParens: Custom
+SpaceBeforeParensOptions:
+  AfterControlStatements: true
+  AfterFunctionDeclarationName: false
+  AfterFunctionDefinitionName: false
+  AfterIfMacros: false
+
+SpaceBeforeSquareBrackets: false
+
+SpacesBeforeTrailingComments: 2
+
+IndentCaseLabels: 'true'
+IndentPPDirectives: BeforeHash
+IndentWidth: '4'
+IndentWrappedFunctionNames: 'false'
+JavaScriptQuotes: Leave
+KeepEmptyLinesAtTheStartOfBlocks: 'false'
+MaxEmptyLinesToKeep: '1'
+ObjCBinPackProtocolList: Never
+ObjCBlockIndentWidth: '4'
+PointerAlignment: Right
+ReflowComments: 'true'
+SortIncludes: 'false'
+SortUsingDeclarations: 'false'
+SpaceAfterCStyleCast: 'true'
+SpaceAfterLogicalNot: 'false'
+SpaceAfterTemplateKeyword: 'false'
+SpaceBeforeAssignmentOperators: 'true'
+SpaceBeforeCpp11BracedList: 'false'
+SpaceBeforeCtorInitializerColon: 'false'
+SpaceBeforeInheritanceColon: 'false'
+SpaceBeforeRangeBasedForLoopColon: 'false'
+SpaceInEmptyParentheses: 'false'
+SpacesInAngles: 'false'
+SpacesInCStyleCastParentheses: 'false'
+SpacesInContainerLiterals: 'false'
+SpacesInParentheses: 'false'
+SpacesInSquareBrackets: 'false'
+TabWidth: '4'
+UseTab: Never
+AlignArrayOfStructures: Left
+DisableFormat: 'false'
+EmptyLineBeforeAccessModifier: LogicalBlock
+ForEachMacros:   [ foreach, Q_FOREACH, BOOST_FOREACH ]
+# A regular expression matching macros that start a block.
+MacroBlockBegin: ''
+# A regular expression matching macros that end a block.
+MacroBlockEnd:   ''
+
+AlignArrayOfStructures: Left
+
+# PenaltyBreakAssignment: 2
+PenaltyBreakAssignment: 2
+PenaltyBreakBeforeFirstCallParameter: 19
+PenaltyBreakComment: 300
+PenaltyBreakFirstLessLess: 120
+PenaltyBreakString: 1000
+PenaltyBreakTemplateDeclaration: 10
+PenaltyExcessCharacter: 1000000
+PenaltyReturnTypeOnItsOwnLine: 60
+
+...
