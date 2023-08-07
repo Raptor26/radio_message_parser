@@ -167,7 +167,7 @@ START_TEST(CtorIfValid)
     xInit.uMemAllocSizeInBytes = sizeof(ucRbMemAlloc);
 
     rmp_obj_t xDataMemAlloc;
-    xInit.hData = &xDataMemAlloc;
+    xInit.hData           = &xDataMemAlloc;
 
     rmp_api_handle_t hAPI = RMP_Ctor(&xInit);
     ck_assert_ptr_nonnull(hAPI);
@@ -326,7 +326,7 @@ START_TEST(FindStartFrameAndCopySomeMessages)
     /* Сформируем первое сообщение, выполним побайтную запись и чтение */
     do
     {
-        uint8_t  uaSrcMem[72] = {0};
+        uint8_t  uaSrcMem[72]  = {0};
         uint8_t *pStartMessage = (uint8_t *) &uaSrcMem[1];
         pStartMessage[0]       = rmpSTART_FRAME_FIRST_BYTE;
         pStartMessage[1]       = rmpSTART_FRAME_SECOND_BYTE;
@@ -555,7 +555,7 @@ prvSetup(void)
     static rmp_obj_t xDataMemAlloc;
     xInit.hData = &xDataMemAlloc;
 
-    hAPI = RMP_Ctor(&xInit);
+    hAPI        = RMP_Ctor(&xInit);
     ck_assert_ptr_nonnull(hAPI);
     hData = (rmp_data_handle_t) hAPI;
 }
