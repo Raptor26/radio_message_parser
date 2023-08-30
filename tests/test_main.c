@@ -72,15 +72,16 @@ START_TEST(ExampleForMAN)
         size_t uWrittenBytesNumb =
             RMP_hAPI->Put(RMP_hAPI, (void *) &aRxDMA[i], 1u);
 
-        if (uWrittenBytesNumb == 1u)
+        if (uWrittenBytesNumb != 1u)
         {
             // Буфер переполнен, запись не выполнена
         }
     }
 
     // Т.к. все сообщения в рамках протокола имеют фиксированный размер, то
-    // пользователю следует выделить область памяти для записи с использованием
-    // определения <rmpONE_MESSAGE_SIZE_IN_BYTES>.
+    // пользователю следует выделить область памяти для получения целого
+    // сообщения из кольцевого буфера с использованием определения
+    // <rmpONE_MESSAGE_SIZE_IN_BYTES>.
     uint8_t aDstMem[rmpONE_MESSAGE_SIZE_IN_BYTES];
 
     // Обратите внимание, что вызов Processing() должен осуществляться

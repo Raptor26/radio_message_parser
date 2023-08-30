@@ -116,7 +116,7 @@
  *      size_t uWrittenBytesNumb =
  *          RMP_hAPI->Put(RMP_hAPI, (void *) &aRxDMA[i], 1u);
  *
- *      if (uWrittenBytesNumb == 1u)
+ *      if (uWrittenBytesNumb != 1u)
  *      {
  *          // Буфер переполнен, запись не выполнена
  *      }
