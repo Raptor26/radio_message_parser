@@ -7,7 +7,7 @@
  * для выполнения в стиле <Bare Metal>. Реализация парсера соответствует
  * протоколу информационного обмена принятого в автопилота БЛА Альбатрос.
  *
- * @version 1.0
+ * @version 0.2.0
  * @date 26-07-2023
  *
  * @details
@@ -181,6 +181,14 @@
 #include <stdint.h>
 #include "lwrb.h"
 
+#if defined(__GNUC__)
+    #ifndef __rmpPACKED
+        #define __rmpPACKED __attribute__((__packed__))
+    #endif
+#else
+    #error "You must define __rmpPACKED for your compiler"
+#endif
+
 #if (rmpTEST_ENABLE == 1)
     #define rmpPRIVATE
 #else
@@ -194,20 +202,33 @@
 /*----------------------------------------------------------------------------*/
 
 #ifndef rmpSTART_FRAME_FIRST_BYTE
-    #define rmpSTART_FRAME_FIRST_BYTE ((uint8_t) 0xFF)
+    #define rmpSTART_FRAME_FIRST_BYTE ((uint8_t) 0xAA)
 #endif
 
 #ifndef rmpSTART_FRAME_SECOND_BYTE
-    #define rmpSTART_FRAME_SECOND_BYTE ((uint8_t) 0xFF)
+    #define rmpSTART_FRAME_SECOND_BYTE ((uint8_t) 0x55)
 #endif
 /*----------------------------------------------------------------------------*/
 
 #ifndef rmpONE_MESSAGE_SIZE_IN_BYTES
-    #define rmpONE_MESSAGE_SIZE_IN_BYTES (18)
+    #define rmpONE_MESSAGE_SIZE_IN_BYTES (20)
 #endif
 /*----------------------------------------------------------------------------*/
 
-#define rmpCRC_SIZE_IN_BYTES (1)
+#define rmpCRC_SIZE_IN_BYTES (2)
+
+typedef struct __rmpPACKED
+{
+    uint8_t uStartFrameFirstByte;
+    uint8_t uStartFrameSecondByte;
+
+    struct
+    {
+        uint8_t uDummy[16];
+    } xPLoad;
+
+    uint16_t uCrc;
+} rmp_package_generic_t;
 
 typedef enum
 {
@@ -412,6 +433,12 @@ RMP_WaitAndCopyMessage(void *vObj, void *pDst, size_t uDstMemSize);
 
 extern rmpPRIVATE uint8_t
 CORE_GetCrc8_XOR(const void *pSrc, size_t len);
+
+extern rmpPRIVATE uint16_t
+CORE_GetCrc16_CCITT_Poly0x1021(const void *pSrc, size_t uLen);
+
+extern rmpPRIVATE uint16_t
+RMP_GetPackCrc(void *pvMessage);
 #endif
 
 #endif /* RADIO_MESSAGE_PARSER_H */

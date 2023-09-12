@@ -116,6 +116,12 @@ START_TEST(StructInit)
 
     ck_assert_ptr_null(xInit.pMemAlloc);
     ck_assert_uint_eq(0u, xInit.uMemAllocSizeInBytes);
+
+    /* Необходимо убедиться, что размер структуры сообщения соответствует
+     * заданному значению */
+    ck_assert_uint_eq(
+        rmpONE_MESSAGE_SIZE_IN_BYTES,
+        sizeof(rmp_package_generic_t));
 }
 
 START_TEST(CtorIfInvalidMem)
@@ -189,6 +195,19 @@ START_TEST(CtorIfValid)
 START_TEST(DtorIfNull)
 {
     ck_assert_uint_eq(false, RMP_Dtor(NULL));
+}
+
+START_TEST(GetCrcByReferencePack)
+{
+    uint8_t uaPackDef[rmpONE_MESSAGE_SIZE_IN_BYTES] = {
+        0xAA, 0x55, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x07, 0xFF, 0xFA, 0x00, 0xB8, 0x20};
+
+    rmp_package_generic_t *pPackRef = (rmp_package_generic_t *) uaPackDef;
+
+    uint16_t uCrc                   = RMP_GetPackCrc((void *) uaPackDef);
+
+    ck_assert_uint_eq(pPackRef->uCrc, uCrc);
 }
 
 START_TEST(APIPutThenRead)
@@ -302,9 +321,8 @@ START_TEST(FindStartFrameAndCopyMessage)
         uaSrcMem[1]  = rmpSTART_FRAME_SECOND_BYTE;
         uaSrcMem[10] = 123;
 
-        uaSrcMem[rmpONE_MESSAGE_SIZE_IN_BYTES - 1u] = CORE_GetCrc8_XOR(
-            (void *) uaSrcMem,
-            rmpONE_MESSAGE_SIZE_IN_BYTES - 1u);
+        uaSrcMem[rmpONE_MESSAGE_SIZE_IN_BYTES - rmpCRC_SIZE_IN_BYTES] =
+            RMP_GetPackCrc((void *) &uaSrcMem[0]);
 
         /* Запись сообщения в буфер */
         hAPI->Put(hAPI, (void *) uaSrcMem, sizeof(uaSrcMem));
@@ -435,9 +453,8 @@ START_TEST(FindStartFrameAndCopyMessageInSmallDstBuff)
         pStartMessage[1]       = rmpSTART_FRAME_SECOND_BYTE;
         pStartMessage[3]       = 123;
 
-        pStartMessage[rmpONE_MESSAGE_SIZE_IN_BYTES - 1u] = CORE_GetCrc8_XOR(
-            (void *) uaSrcMem,
-            rmpONE_MESSAGE_SIZE_IN_BYTES - 1u);
+        pStartMessage[rmpONE_MESSAGE_SIZE_IN_BYTES - rmpCRC_SIZE_IN_BYTES] =
+            RMP_GetPackCrc((void *) uaSrcMem);
 
         /* Размера целевой области памяти недостаточно */
         uint8_t uaDstMem[rmpONE_MESSAGE_SIZE_IN_BYTES - 1u] = {0};
@@ -495,6 +512,7 @@ main(int argc, char *argv[], char *envp[])
         tcase_add_test(tc, CtorIfValidMemAndSizeButInvalidData);
         tcase_add_test(tc, CtorIfValid);
         tcase_add_test(tc, DtorIfNull);
+        tcase_add_test(tc, GetCrcByReferencePack);
         /*--------------------------------------------------------------------*/
 
         /* Добавить тестовый набор к тестовому объекту */
