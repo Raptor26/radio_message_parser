@@ -351,9 +351,8 @@ START_TEST(FindStartFrameAndCopySomeMessages)
         pStartMessage[1]       = rmpSTART_FRAME_SECOND_BYTE;
         pStartMessage[3]       = 123;
 
-        pStartMessage[rmpONE_MESSAGE_SIZE_IN_BYTES - 1u] = CORE_GetCrc8_XOR(
-            (void *) uaSrcMem,
-            rmpONE_MESSAGE_SIZE_IN_BYTES - 1u);
+        pStartMessage[rmpONE_MESSAGE_SIZE_IN_BYTES - 1u] =
+            RMP_GetPackCrc((void *) uaSrcMem);
 
         uint8_t uaDstMem[rmpONE_MESSAGE_SIZE_IN_BYTES] = {0};
         /* Побайтная запись в буфер и периодическое чтение сообщений */
@@ -384,9 +383,8 @@ START_TEST(FindStartFrameAndCopySomeMessages)
         pStartMessage[1]       = rmpSTART_FRAME_SECOND_BYTE;
         pStartMessage[3]       = 123;
 
-        pStartMessage[rmpONE_MESSAGE_SIZE_IN_BYTES - 1u] = CORE_GetCrc8_XOR(
-            (void *) uaSrcMem,
-            rmpONE_MESSAGE_SIZE_IN_BYTES - 1u);
+        pStartMessage[rmpONE_MESSAGE_SIZE_IN_BYTES - 1u] =
+            RMP_GetPackCrc((void *) uaSrcMem);
 
         uint8_t uaDstMem[rmpONE_MESSAGE_SIZE_IN_BYTES] = {0};
         /* Побайтная запись в буфер и периодическое чтение сообщений */
