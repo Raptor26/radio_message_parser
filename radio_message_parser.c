@@ -107,7 +107,7 @@ RMP_Ctor(rmp_init_t *pxInit)
     /*------------------------------------------------------------------------*/
 
     extern rmp_state_api_handle_t RMP_InitStateAPI(void *vObj);
-    (void *) RMP_InitStateAPI(hData);
+    RMP_InitStateAPI(hData);
     /*------------------------------------------------------------------------*/
 
     if (bIsCtorErrorDetect == true)

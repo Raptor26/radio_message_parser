@@ -54,9 +54,6 @@ RMP_Get(void *vObj, void *pDst, size_t uDstMemSize);
 bool
 RMP_SetState(void *vObj, rmp_state_e eNewState);
 
-rmpPRIVATE uint8_t
-CORE_GetCrc8_XOR(const void *pSrc, size_t len);
-
 rmpPRIVATE uint16_t
 CORE_GetCrc16_CCITT_Poly0x1021(const void *pSrc, size_t uLen);
 
@@ -137,12 +134,11 @@ RMP_FindSecondByte(void *vObj, void *pDst, size_t uDstMemSize)
     (void) pDst;
     (void) uDstMemSize;
 
-    rmp_data_handle_t hObj        = (rmp_data_handle_t) vObj;
     uint8_t           uOneByte    = 0u;
     rmp_return_code   eReturnCode = rmpIN_PROGRESS;
 
-    size_t uReadBytesNumb =
-        lwrb_read(&hObj->xLWRB, &uOneByte, sizeof(uOneByte));
+    size_t uReadBytesNumb = 
+        RMP_Get(vObj, &uOneByte, sizeof(uOneByte));
 
     /* В буфер еще не записаны данные */
     if (uReadBytesNumb == 0)
@@ -184,8 +180,8 @@ RMP_WaitAndCopyMessage(void *vObj, void *pDst, size_t uDstMemSize)
         uint8_t *pDstMemByte = (uint8_t *) pDst;
         pDstMemByte[0]       = rmpSTART_FRAME_FIRST_BYTE;
         pDstMemByte[1]       = rmpSTART_FRAME_SECOND_BYTE;
-        lwrb_read(
-            &hObj->xLWRB,
+        RMP_Get(
+            vObj, 
             &pDstMemByte[sizeof(rmpSTART_FRAME)],
             rmpONE_MESSAGE_SIZE_IN_BYTES - sizeof(rmpSTART_FRAME));
 
@@ -256,21 +252,6 @@ RMP_GetState(void *vObj)
     rmp_data_handle_t hObj = (rmp_data_handle_t) vObj;
 
     return (hObj->eState);
-}
-
-rmpPRIVATE uint8_t
-CORE_GetCrc8_XOR(const void *pSrc, size_t len)
-{
-    uint8_t *pMem = (uint8_t *) pSrc;
-
-    uint8_t uCrc  = 0u;
-    size_t i;
-    for (i = 0; i < len; i++)
-    {
-        uCrc ^= *pMem++;
-    }
-
-    return (uCrc);
 }
 
 /**

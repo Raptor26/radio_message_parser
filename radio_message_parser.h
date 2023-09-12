@@ -431,9 +431,6 @@ RMP_FindSecondByte(void *vObj, void *pDst, size_t uDstMemSize);
 extern rmpPRIVATE rmp_return_code
 RMP_WaitAndCopyMessage(void *vObj, void *pDst, size_t uDstMemSize);
 
-extern rmpPRIVATE uint8_t
-CORE_GetCrc8_XOR(const void *pSrc, size_t len);
-
 extern rmpPRIVATE uint16_t
 CORE_GetCrc16_CCITT_Poly0x1021(const void *pSrc, size_t uLen);
 
