@@ -134,11 +134,10 @@ RMP_FindSecondByte(void *vObj, void *pDst, size_t uDstMemSize)
     (void) pDst;
     (void) uDstMemSize;
 
-    uint8_t           uOneByte    = 0u;
-    rmp_return_code   eReturnCode = rmpIN_PROGRESS;
+    uint8_t         uOneByte    = 0u;
+    rmp_return_code eReturnCode = rmpIN_PROGRESS;
 
-    size_t uReadBytesNumb = 
-        RMP_Get(vObj, &uOneByte, sizeof(uOneByte));
+    size_t uReadBytesNumb       = RMP_Get(vObj, &uOneByte, sizeof(uOneByte));
 
     /* В буфер еще не записаны данные */
     if (uReadBytesNumb == 0)
@@ -181,7 +180,7 @@ RMP_WaitAndCopyMessage(void *vObj, void *pDst, size_t uDstMemSize)
         pDstMemByte[0]       = rmpSTART_FRAME_FIRST_BYTE;
         pDstMemByte[1]       = rmpSTART_FRAME_SECOND_BYTE;
         RMP_Get(
-            vObj, 
+            vObj,
             &pDstMemByte[sizeof(rmpSTART_FRAME)],
             rmpONE_MESSAGE_SIZE_IN_BYTES - sizeof(rmpSTART_FRAME));
 
