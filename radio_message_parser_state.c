@@ -264,7 +264,8 @@ CORE_GetCrc8_XOR(const void *pSrc, size_t len)
     uint8_t *pMem = (uint8_t *) pSrc;
 
     uint8_t uCrc  = 0u;
-    for (size_t i = 0; i < len; i++)
+    size_t i;
+    for (i = 0; i < len; i++)
     {
         uCrc ^= *pMem++;
     }
