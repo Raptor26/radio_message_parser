@@ -2,36 +2,55 @@ cmake_minimum_required(VERSION 3.25 FATAL_ERROR)
 
 set(project_description_str "Radio message parser library for Albatros")
 
-project(radio_message_parser
-    VERSION 0.2.0
-    DESCRIPTION ${project_description_str}
-    LANGUAGES C)
+project(
+  radio_message_parser
+  VERSION 1.0.0
+  DESCRIPTION ${project_description_str}
+  LANGUAGES C)
 
-set(RADIO_MESSAGE_PARSER_SRC
-    ${CMAKE_CURRENT_SOURCE_DIR}/radio_message_parser_api.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/radio_message_parser_state.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/radio_message_parser.c
-    ${CMAKE_SOURCE_DIR}/lwrb/lwrb_ext.c
-    ${CMAKE_SOURCE_DIR}/lwrb/lwrb_message_api.c
-    ${CMAKE_SOURCE_DIR}/lwrb/lwrb.c)
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+  # Данный CMakeLists.txt является головным, необходимо явно определить
+  # NEED_EMBEDDED_LWRB для удовлетворения зависимостей сборки
+  set(NEED_EMBEDDED_LWRB true)
+endif()
 
-set_source_files_properties(${RADIO_MESSAGE_PARSER_SRC}
-    PROPERTIES
-    COMPILE_FLAGS "-Wall -Wextra -Werror -pedantic")
-add_library(radio_message_parser STATIC ${RADIO_MESSAGE_PARSER_SRC})
-target_link_libraries(radio_message_parser PUBLIC macros_definition)
+add_library(${PROJECT_NAME} STATIC)
 
-target_include_directories(radio_message_parser
-    PUBLIC
-    "${CMAKE_CURRENT_SOURCE_DIR}/"
-    "${CMAKE_SOURCE_DIR}/"
-    "${CMAKE_SOURCE_DIR}/lwrb/"
-    "${CMAKE_SOURCE_DIR}/PHAL/")
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Werror -Wpedantic)
+target_compile_features(${PROJECT_NAME} PRIVATE c_std_11)
+
+target_sources(
+  ${PROJECT_NAME}
+  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/radio_message_parser_api.c
+          ${CMAKE_CURRENT_SOURCE_DIR}/radio_message_parser_state.c
+          ${CMAKE_CURRENT_SOURCE_DIR}/radio_message_parser.c)
+
+target_include_directories(${PROJECT_NAME}
+                           PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/")
+
+if(NEED_EMBEDDED_LWRB)
+  add_subdirectory(lwrb)
+  target_link_libraries(${PROJECT_NAME} PUBLIC lwrb)
+  target_include_directories(
+    radio_message_parser
+    PUBLIC "${CMAKE_SOURCE_DIR}/lwrb/lwrb/src/include/lwrb/")
+else()
+  target_sources(
+    ${PROJECT_NAME}
+    PRIVATE ${CMAKE_SOURCE_DIR}/lwrb/lwrb_ext.c
+            ${CMAKE_SOURCE_DIR}/lwrb/lwrb_message_api.c
+            ${CMAKE_SOURCE_DIR}/lwrb/lwrb.c)
+
+  target_include_directories(radio_message_parser
+                             PUBLIC "${CMAKE_SOURCE_DIR}/lwrb/")
+endif()
+
+target_include_directories(
+  radio_message_parser PUBLIC "${CMAKE_SOURCE_DIR}/"
+                              "${CMAKE_CURRENT_SOURCE_DIR}/")
 
 if(UTEST_ENABLE)
-    message(STATUS "Build UTest for test_radio_message_parser")
-    target_compile_definitions(radio_message_parser PUBLIC
-        -DrmpTEST_ENABLE=1
-        -DLWRB_CHECKING_ENABLE)
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tests)
+  target_compile_definitions(${PROJECT_NAME} PUBLIC -DrmpTEST_ENABLE=1
+                                                    -DLWRB_CHECKING_ENABLE)
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tests)
 endif()

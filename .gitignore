@@ -1,0 +1,13 @@
+# Игнорировать содержимое папки <Debug>
+/Debug/
+/Release/
+/build/
+
+# Игнорировать содержимое корневой папки <.settings>
+/.settings/*
+
+# Git Subrepo tmp path
+.git-rewrite
+
+*.launch
+
