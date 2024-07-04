@@ -48,7 +48,6 @@ BinPackArguments: 'false'
 BinPackParameters: 'false'
 BreakAfterJavaFieldAnnotations: 'true'
 BreakBeforeBinaryOperators: NonAssignment
-BreakBeforeBraces: Allman
 BreakBeforeTernaryOperators: 'true'
 BreakConstructorInitializers: AfterColon
 BreakInheritanceList: AfterColon
@@ -138,8 +137,6 @@ ForEachMacros:   [ foreach, Q_FOREACH, BOOST_FOREACH ]
 MacroBlockBegin: ''
 # A regular expression matching macros that end a block.
 MacroBlockEnd:   ''
-
-AlignArrayOfStructures: Left
 
 # PenaltyBreakAssignment: 2
 PenaltyBreakAssignment: 2

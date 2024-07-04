@@ -4,12 +4,11 @@
  *
  * @brief RMP расшифровывается как <Radio Message Parser>. Библиотека содержит
  * программную реализацию парсера сообщений фиксированной длины и предназначена
- * для выполнения в стиле <Bare Metal>. Реализация парсера соответствует
- * протоколу информационного обмена принятого в автопилота БЛА Альбатрос.
+ * для выполнения в стиле <Bare Metal>.
  *
  * Более подробное описание вы можете найти в <radio_message_parser.h>.
  *
- * @version 1.0.0
+ * @version 1.0.1
  *
  * @copyright Copyright (c) 2024 StilSoft
  *
@@ -83,13 +82,11 @@ prvProcessing(void *vObj, void *pDst, size_t uDstMemSize)
     size_t            uRxMessageSize = 0u;
     rmp_return_code   eReturnCode    = rmpIN_PROGRESS;
 
-    do
-    {
+    do {
         eReturnCode =
             hObj->xStateAPI.aFn[RMP_GetState(vObj)](vObj, pDst, uDstMemSize);
 
-        if (eReturnCode == rmpMESSAGE_COPIED)
-        {
+        if (eReturnCode == rmpMESSAGE_COPIED) {
             uRxMessageSize = rmpONE_MESSAGE_SIZE_IN_BYTES;
         }
     } while (eReturnCode == rmpIN_PROGRESS);

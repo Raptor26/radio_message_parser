@@ -4,12 +4,11 @@
  *
  * @brief RMP расшифровывается как <Radio Message Parser>. Библиотека содержит
  * программную реализацию парсера сообщений фиксированной длины и предназначена
- * для выполнения в стиле <Bare Metal>. Реализация парсера соответствует
- * протоколу информационного обмена принятого в автопилота БЛА Альбатрос.
+ * для выполнения в стиле <Bare Metal>.
  *
  * Более подробное описание вы можете найти в <radio_message_parser.h>.
  *
- * @version 1.0.0
+ * @version 1.0.1
  *
  * @copyright Copyright (c) 2024 StilSoft
  *
@@ -87,8 +86,7 @@ RMP_FindFirstByte(void *vObj, void *pDst, size_t uDstMemSize)
     rmp_return_code eReturnCode = rmpBREAK;
 
     /* Циклический поиск байта начала сообщения */
-    while (1)
-    {
+    while (1) {
         /* Поиск первого байта начала пакета данных */
         uOneByte = 0u;
 
@@ -98,15 +96,13 @@ RMP_FindFirstByte(void *vObj, void *pDst, size_t uDstMemSize)
         uReadBytesCnt += uReadBytesNumb;
 
         /* В буфере нет байт, необходимо принудительно выйти из цикла */
-        if (uReadBytesNumb == 0u)
-        {
+        if (uReadBytesNumb == 0u) {
             break;
         }
         /*--------------------------------------------------------------------*/
 
         /* Если обнаружен первый байт */
-        if (uOneByte == rmpSTART_FRAME_FIRST_BYTE)
-        {
+        if (uOneByte == rmpSTART_FRAME_FIRST_BYTE) {
             /* Переход в состояние поиска 2-го байта */
             RMP_SetState(vObj, rmpSTATE_FIND_SECOND_BYTE);
 
@@ -117,8 +113,7 @@ RMP_FindFirstByte(void *vObj, void *pDst, size_t uDstMemSize)
         /* if (uOneByte == rmpSTART_FRAME_FIRST_BYTE) */
 
         /* Считано больше байт чем разрешено за один вызов Processing() */
-        if (uReadBytesNumb > hObj->uReadBytesThreshold)
-        {
+        if (uReadBytesNumb > hObj->uReadBytesThreshold) {
             break;
         }
     }
@@ -139,21 +134,17 @@ RMP_FindSecondByte(void *vObj, void *pDst, size_t uDstMemSize)
     size_t uReadBytesNumb       = RMP_Get(vObj, &uOneByte, sizeof(uOneByte));
 
     /* В буфер еще не записаны данные */
-    if (uReadBytesNumb == 0)
-    {
+    if (uReadBytesNumb == 0) {
         /* Необходимо вернуть код статуса, при получении которого Processing()
          * выйдет из обработки и вернет управление вызывающей функции. Данное
          * условие не означает что за первым байтом не следует второго, это
          * означает что пока в буфере нет данных и, при их получении, необходимо
          * повторить попытку чтения 2-го байта */
         eReturnCode = rmpBREAK;
-    }
-    else if ((uReadBytesNumb == 1u) && (uOneByte == rmpSTART_FRAME_SECOND_BYTE))
-    {
+    } else if (
+        (uReadBytesNumb == 1u) && (uOneByte == rmpSTART_FRAME_SECOND_BYTE)) {
         RMP_SetState(vObj, rmpSTATE_WAIT_AND_COPY_MESSAGE);
-    }
-    else
-    {
+    } else {
         RMP_SetState(vObj, rmpSTATE_FIND_FIRST_BYTE);
     }
 
@@ -170,8 +161,7 @@ RMP_WaitAndCopyMessage(void *vObj, void *pDst, size_t uDstMemSize)
      * допустимому размеру и в буфере находится необходимое количество байт */
     if ((uDstMemSize >= rmpONE_MESSAGE_SIZE_IN_BYTES)
         && (lwrb_get_full(&hObj->xLWRB)
-            >= (rmpONE_MESSAGE_SIZE_IN_BYTES - sizeof(rmpSTART_FRAME))))
-    {
+            >= (rmpONE_MESSAGE_SIZE_IN_BYTES - sizeof(rmpSTART_FRAME)))) {
         /* В буфере есть необходимое количество байт, требуется выполнить
          * копирование сообщения в целевую область памяти */
 
@@ -195,8 +185,7 @@ RMP_WaitAndCopyMessage(void *vObj, void *pDst, size_t uDstMemSize)
         uint8_t *pDstIdx = (uint8_t *) pDst;
 
         if (uCrc
-            == pDstIdx[rmpONE_MESSAGE_SIZE_IN_BYTES - rmpCRC_SIZE_IN_BYTES])
-        {
+            == pDstIdx[rmpONE_MESSAGE_SIZE_IN_BYTES - rmpCRC_SIZE_IN_BYTES]) {
             eReturnCode = rmpMESSAGE_COPIED;
         }
         /* if (uCrc
@@ -233,8 +222,7 @@ RMP_SetState(void *vObj, rmp_state_e eNewState)
 
     bool bIsStateWasUpdates = false;
 
-    if (eNewState < rmpSTATE_MAX_NUMB)
-    {
+    if (eNewState < rmpSTATE_MAX_NUMB) {
         hObj->eState       = eNewState;
 
         bIsStateWasUpdates = true;
@@ -270,12 +258,10 @@ CORE_GetCrc16_CCITT_Poly0x1021(const void *pSrc, size_t uLen)
 
     uint16_t uCrc = 0xFFFF;
 
-    while (uLen--)
-    {
+    while (uLen--) {
         uCrc ^= (uint16_t) (*pMem++ << 8u);
         size_t i;
-        for (i = 0; i < 8; i++)
-        {
+        for (i = 0; i < 8; i++) {
             uCrc =
                 (uint16_t) (uCrc & 0x8000 ? (uCrc << 1) ^ 0x1021 : uCrc << 1);
         }
