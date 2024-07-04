@@ -24,8 +24,7 @@ START_TEST(ExampleForMAN)
     rmp_api_handle_t RMP_hAPI = NULL;
 
     // Инициализация
-    do
-    {
+    do {
         rmp_init_t xInit;
         RMP_StructInit(&xInit);
 
@@ -44,8 +43,7 @@ START_TEST(ExampleForMAN)
         xInit.hData = &xDataMemAlloc;
 
         RMP_hAPI    = RMP_Ctor(&xInit);
-        if (RMP_hAPI == NULL)
-        {
+        if (RMP_hAPI == NULL) {
             // Объект не инициализирован, дальнейшая работа невозможна
         }
     } while (0);
@@ -58,8 +56,7 @@ START_TEST(ExampleForMAN)
     // Тогда запись в кольцевой буфер примет вид:
     size_t uRxBytesNumb = RMP_hAPI->Put(RMP_hAPI, (void *) &aRxDMA[15], 18u);
 
-    if (uRxBytesNumb != 18u)
-    {
+    if (uRxBytesNumb != 18u) {
         // Буфер переполнен, запись не выполнена
     }
 
@@ -67,13 +64,11 @@ START_TEST(ExampleForMAN)
     // качестве иллюстрации, в реальном коде пример в данном виде избыточен,
     // но может использоваться при побайтном получении данных от приемника UART
     // если DMA недоступен)
-    for (size_t i = 15u; i < 33; ++i)
-    {
+    for (size_t i = 15u; i < 33; ++i) {
         size_t uWrittenBytesNumb =
             RMP_hAPI->Put(RMP_hAPI, (void *) &aRxDMA[i], 1u);
 
-        if (uWrittenBytesNumb != 1u)
-        {
+        if (uWrittenBytesNumb != 1u) {
             // Буфер переполнен, запись не выполнена
         }
     }
@@ -96,14 +91,11 @@ START_TEST(ExampleForMAN)
     // невалидного сообщения, используете условие <if (uRxMessageSize ==
     // rmpONE_MESSAGE_SIZE_IN_BYTES)> (см. пример ниже):
 
-    if (uRxMessageSize == rmpONE_MESSAGE_SIZE_IN_BYTES)
-    {
+    if (uRxMessageSize == rmpONE_MESSAGE_SIZE_IN_BYTES) {
         // Сообщение успешно записано в <aDstMem> и его контрольная сумма
         // достоверна.
         // Можно выполнять обработку сообщения в <aDstMem>.
-    }
-    else
-    {
+    } else {
         // Сообщение не найдено
     }
 }
@@ -184,8 +176,7 @@ START_TEST(CtorIfValid)
 
     /* Проверка наличия адреса у функций-обработчиков состояний */
     rmp_data_handle_t hData = (rmp_data_handle_t) hAPI;
-    for (size_t i = 0u; i < rmpSTATE_MAX_NUMB; ++i)
-    {
+    for (size_t i = 0u; i < rmpSTATE_MAX_NUMB; ++i) {
         ck_assert_ptr_nonnull(hData->xStateAPI.aFn[i]);
     }
 
@@ -231,8 +222,7 @@ START_TEST(APIPutThenReadInCycle)
     const size_t uBytesNumbInOneIteration = 1u;
 
     /* Побайтная запись сообщения в кольцевой буфер */
-    for (size_t i = 0; i < uSrlLen; ++i)
-    {
+    for (size_t i = 0; i < uSrlLen; ++i) {
         size_t uWrittenBytesNumb =
             hAPI->Put(hAPI, (void *) &pSrc[i], uBytesNumbInOneIteration);
 
@@ -243,8 +233,7 @@ START_TEST(APIPutThenReadInCycle)
     uint8_t uaDstStr[48] = {0};
 
     /* Побайтное чтение сообщения из кольцевого буфера */
-    for (size_t i = 0; i < uSrlLen; ++i)
-    {
+    for (size_t i = 0; i < uSrlLen; ++i) {
         size_t uReadBytesNumb =
             RMP_Get(hAPI, (void *) &uaDstStr[i], uBytesNumbInOneIteration);
 
@@ -267,8 +256,7 @@ START_TEST(SetNewState)
 START_TEST(StateFindStartFrame)
 {
     /* Случай, когда байты начала сообщения расположены последовательно */
-    do
-    {
+    do {
         hAPI->Reset(hAPI);
 
         const size_t uFirstByteIdx = 1;
@@ -290,8 +278,7 @@ START_TEST(StateFindStartFrame)
 
     /* Байты начала сообщения не расположены последовательно, соответственно,
      * считаем что начало сообщения не найдено */
-    do
-    {
+    do {
         hAPI->Reset(hAPI);
 
         const size_t uFirstByteIdx = 5;
@@ -314,8 +301,7 @@ START_TEST(StateFindStartFrame)
 
 START_TEST(FindStartFrameAndCopyMessage)
 {
-    do
-    {
+    do {
         uint8_t uaSrcMem[rmpONE_MESSAGE_SIZE_IN_BYTES] = {0};
         uaSrcMem[0]  = rmpSTART_FRAME_FIRST_BYTE;
         uaSrcMem[1]  = rmpSTART_FRAME_SECOND_BYTE;
@@ -343,8 +329,7 @@ START_TEST(FindStartFrameAndCopyMessage)
 START_TEST(FindStartFrameAndCopySomeMessages)
 {
     /* Сформируем первое сообщение, выполним побайтную запись и чтение */
-    do
-    {
+    do {
         uint8_t  uaSrcMem[72]  = {0};
         uint8_t *pStartMessage = (uint8_t *) &uaSrcMem[1];
         pStartMessage[0]       = rmpSTART_FRAME_FIRST_BYTE;
@@ -356,15 +341,13 @@ START_TEST(FindStartFrameAndCopySomeMessages)
 
         uint8_t uaDstMem[rmpONE_MESSAGE_SIZE_IN_BYTES] = {0};
         /* Побайтная запись в буфер и периодическое чтение сообщений */
-        for (size_t i = 0u; i < sizeof(uaSrcMem); ++i)
-        {
+        for (size_t i = 0u; i < sizeof(uaSrcMem); ++i) {
             hAPI->Put(hAPI, &uaSrcMem[i], 1u);
 
             size_t uReadMessageSize =
                 hAPI->Processing(hAPI, (void *) uaDstMem, sizeof(uaDstMem));
 
-            if (uReadMessageSize != 0u)
-            {
+            if (uReadMessageSize != 0u) {
                 ck_assert_mem_eq(pStartMessage, uaDstMem, sizeof(uaDstMem));
                 /* В буфере обнаружено первое сообщение, необходимо выйти из
                  * цикла
@@ -375,8 +358,7 @@ START_TEST(FindStartFrameAndCopySomeMessages)
     } while (0);
 
     /* Сформируем второе сообщение, выполним побайтную запись и чтение */
-    do
-    {
+    do {
         uint8_t  uaSrcMem[256] = {0};
         uint8_t *pStartMessage = (uint8_t *) &uaSrcMem[0];
         pStartMessage[0]       = rmpSTART_FRAME_FIRST_BYTE;
@@ -388,15 +370,13 @@ START_TEST(FindStartFrameAndCopySomeMessages)
 
         uint8_t uaDstMem[rmpONE_MESSAGE_SIZE_IN_BYTES] = {0};
         /* Побайтная запись в буфер и периодическое чтение сообщений */
-        for (size_t i = 0u; i < sizeof(uaSrcMem); ++i)
-        {
+        for (size_t i = 0u; i < sizeof(uaSrcMem); ++i) {
             hAPI->Put(hAPI, &uaSrcMem[i], 1u);
 
             size_t uReadMessageSize =
                 hAPI->Processing(hAPI, (void *) uaDstMem, sizeof(uaDstMem));
 
-            if (uReadMessageSize != 0u)
-            {
+            if (uReadMessageSize != 0u) {
                 ck_assert_mem_eq(pStartMessage, uaDstMem, sizeof(uaDstMem));
                 /* В буфере обнаружено первое сообщение, необходимо выйти из
                  * цикла
@@ -407,8 +387,7 @@ START_TEST(FindStartFrameAndCopySomeMessages)
     } while (0);
 
     /* Сформируем третье сообщение без контрольной суммы */
-    do
-    {
+    do {
         uint8_t uaSrcMem[128] = {0};
         uaSrcMem[0]           = rmpSTART_FRAME_FIRST_BYTE;
         uaSrcMem[1]           = rmpSTART_FRAME_SECOND_BYTE;
@@ -421,8 +400,7 @@ START_TEST(FindStartFrameAndCopySomeMessages)
         uint8_t uaDstMem[rmpONE_MESSAGE_SIZE_IN_BYTES] = {0};
 
         /* Побайтная запись в буфер и периодическое чтение сообщений */
-        for (size_t i = 0u; i < sizeof(uaSrcMem); ++i)
-        {
+        for (size_t i = 0u; i < sizeof(uaSrcMem); ++i) {
             hAPI->Put(hAPI, &uaSrcMem[i], 1u);
 
             size_t uReadMessageSize =
@@ -430,8 +408,7 @@ START_TEST(FindStartFrameAndCopySomeMessages)
 
             /* Сообщение не должно быть считано т.к. контрольная сумма не
              * достоверна */
-            if (uReadMessageSize != 0u)
-            {
+            if (uReadMessageSize != 0u) {
                 ck_abort_msg("Buffer dont have valid message!");
 
                 break;
@@ -443,8 +420,7 @@ START_TEST(FindStartFrameAndCopySomeMessages)
 START_TEST(FindStartFrameAndCopyMessageInSmallDstBuff)
 {
     /* Сформируем первое сообщение, выполним побайтную запись и чтение */
-    do
-    {
+    do {
         uint8_t  uaSrcMem[128] = {0};
         uint8_t *pStartMessage = (uint8_t *) &uaSrcMem[0];
         pStartMessage[0]       = rmpSTART_FRAME_FIRST_BYTE;
@@ -457,15 +433,13 @@ START_TEST(FindStartFrameAndCopyMessageInSmallDstBuff)
         /* Размера целевой области памяти недостаточно */
         uint8_t uaDstMem[rmpONE_MESSAGE_SIZE_IN_BYTES - 1u] = {0};
         /* Побайтная запись в буфер и периодическое чтение сообщений */
-        for (size_t i = 0u; i < 64; ++i)
-        {
+        for (size_t i = 0u; i < 64; ++i) {
             hAPI->Put(hAPI, &uaSrcMem[i], 1u);
 
             size_t uReadMessageSize =
                 hAPI->Processing(hAPI, (void *) uaDstMem, sizeof(uaDstMem));
 
-            if (uReadMessageSize != 0u)
-            {
+            if (uReadMessageSize != 0u) {
                 ck_abort_msg("Buffer dont have valid message!");
             }
         }
@@ -536,8 +510,7 @@ main(int argc, char *argv[], char *envp[])
     } while (0);
     /*------------------------------------------------------------------------*/
 
-    do
-    {
+    do {
         /* Создать тестовый набор */
         TCase *tc = tcase_create("Radio message parser API with fixture");
         tcase_add_checked_fixture(tc, prvSetup, prvTeardown);
@@ -549,8 +522,7 @@ main(int argc, char *argv[], char *envp[])
         suite_add_tcase(s, tc);
     } while (0);
 
-    do
-    {
+    do {
         /* Создать тестовый набор */
         TCase *tc = tcase_create("Radio message state API with fixture");
         tcase_add_checked_fixture(tc, prvSetup, prvTeardown);

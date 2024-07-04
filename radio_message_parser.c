@@ -64,23 +64,19 @@ RMP_StructInit(rmp_init_t *pxInit)
 rmp_api_handle_t
 RMP_Ctor(rmp_init_t *pxInit)
 {
-    if (pxInit == NULL)
-    {
+    if (pxInit == NULL) {
         return (NULL);
     }
 
-    if (pxInit->pMemAlloc == NULL)
-    {
+    if (pxInit->pMemAlloc == NULL) {
         return (NULL);
     }
 
-    if (pxInit->uMemAllocSizeInBytes == 0u)
-    {
+    if (pxInit->uMemAllocSizeInBytes == 0u) {
         return (NULL);
     }
 
-    if (pxInit->hData == NULL)
-    {
+    if (pxInit->hData == NULL) {
         return (NULL);
     }
 
@@ -97,8 +93,7 @@ RMP_Ctor(rmp_init_t *pxInit)
             &hData->xLWRB,
             pxInit->pMemAlloc,
             pxInit->uMemAllocSizeInBytes)
-        == false)
-    {
+        == false) {
         bIsCtorErrorDetect = true;
     }
 
@@ -110,8 +105,7 @@ RMP_Ctor(rmp_init_t *pxInit)
     RMP_InitStateAPI(hData);
     /*------------------------------------------------------------------------*/
 
-    if (bIsCtorErrorDetect == true)
-    {
+    if (bIsCtorErrorDetect == true) {
         RMP_Dtor(hAPI);
 
         hAPI = NULL;
@@ -126,8 +120,7 @@ RMP_Dtor(rmp_api_handle_t hAPI)
 {
     bool bIsObjDestroyed = false;
 
-    if (hAPI != NULL)
-    {
+    if (hAPI != NULL) {
         rmp_data_handle_t hObj = (rmp_data_handle_t) hAPI;
 
         /* Освобождение занимаемых ресурсов */
