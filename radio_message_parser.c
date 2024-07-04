@@ -36,6 +36,7 @@
  */
 
 #include <string.h>
+#include <stdbool.h>
 #include "radio_message_parser.h"
 
 /**
@@ -97,7 +98,7 @@ RMP_Ctor(rmp_init_t *pxInit)
             &hData->xLWRB,
             pxInit->pMemAlloc,
             pxInit->uMemAllocSizeInBytes)
-        == NULL)
+        == false)
     {
         bIsCtorErrorDetect = true;
     }
