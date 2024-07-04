@@ -490,14 +490,32 @@ START_TEST(Reset)
     ck_assert_uint_eq(rmpSTATE_FIND_FIRST_BYTE, RMP_GetState(hAPI));
 }
 
+START_TEST(JoyCommand)
+{
+    uint8_t uaPackDef[rmpONE_MESSAGE_SIZE_IN_BYTES] = {
+        0xAA, 0x55, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x23, 0x90, 0x59};
+
+    ck_assert_ptr_nonnull(hAPI);
+    ck_assert_ptr_nonnull(hAPI->Reset);
+
+    hAPI->Put(hAPI, (void *) uaPackDef, sizeof(uaPackDef));
+    RMP_SetState(hAPI, rmpSTATE_FIND_FIRST_BYTE);
+
+    uint8_t uaDstMem[rmpONE_MESSAGE_SIZE_IN_BYTES] = {0};
+    size_t  uReceiverMessageSize =
+        hAPI->Processing(hAPI, (void *) uaDstMem, sizeof(uaDstMem));
+
+    ck_assert_uint_eq(rmpONE_MESSAGE_SIZE_IN_BYTES, uReceiverMessageSize);
+}
+
 int
 main(int argc, char *argv[], char *envp[])
 {
     /* Создать тестовый объект */
     Suite *s = suite_create("Radio message parser");
 
-    do
-    {
+    do {
         /* Создать тестовый набор */
         TCase *tc = tcase_create("Radio message parser with no fixture");
 
@@ -543,6 +561,7 @@ main(int argc, char *argv[], char *envp[])
         tcase_add_test(tc, FindStartFrameAndCopySomeMessages);
         tcase_add_test(tc, FindStartFrameAndCopyMessageInSmallDstBuff);
         tcase_add_test(tc, Reset);
+        tcase_add_test(tc, JoyCommand);
 
         /* Добавить тестовый набор к тестовому объекту */
         suite_add_tcase(s, tc);
