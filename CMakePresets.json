@@ -1,0 +1,42 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 23,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "CTest_PC_Debug_with_gcc",
+            "displayName": "Debug CTest windows/linux with gcc",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_C_COMPILER": "gcc",
+                "UTEST_ENABLE": "true"
+            }
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "CTest_All_gcc",
+            "description": "Run All tests in windows/linux with gcc",
+            "configurePreset": "CTest_PC_Debug_with_gcc",
+            "output": {
+                "outputOnFailure": true,
+                "verbosity": "default",
+                "shortProgress": true,
+                "labelSummary": true,
+                "quiet": false
+            },
+            "execution": {
+                "noTestsAction": "error",
+                "stopOnFailure": true,
+                "scheduleRandom": true,
+                "timeout": 15,
+                "jobs": 3
+            }
+        }
+    ]
+}
