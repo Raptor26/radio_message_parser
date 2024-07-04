@@ -9,10 +9,9 @@
  *
  * Более подробное описание вы можете найти в <radio_message_parser.h>.
  *
- * @version 0.2.0
- * @date 26-07-2023
+ * @version 1.0.0
  *
- * @copyright Copyright (c) 2023 StilSoft
+ * @copyright Copyright (c) 2024 StilSoft
  *
  * MIT License:
  *
@@ -36,6 +35,7 @@
  */
 
 #include <string.h>
+#include <stdbool.h>
 #include "radio_message_parser.h"
 
 /**
@@ -97,7 +97,7 @@ RMP_Ctor(rmp_init_t *pxInit)
             &hData->xLWRB,
             pxInit->pMemAlloc,
             pxInit->uMemAllocSizeInBytes)
-        == NULL)
+        == false)
     {
         bIsCtorErrorDetect = true;
     }
