@@ -50,6 +50,8 @@ target_include_directories(
                               "${CMAKE_CURRENT_SOURCE_DIR}/")
 
 if(UTEST_ENABLE)
+  include(CTest)
+  enable_testing()
   target_compile_definitions(${PROJECT_NAME} PUBLIC -DrmpTEST_ENABLE=1
                                                     -DLWRB_CHECKING_ENABLE)
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tests)
