@@ -9,10 +9,9 @@
  *
  * Более подробное описание вы можете найти в <radio_message_parser.h>.
  *
- * @version 0.2.0
- * @date 26-07-2023
+ * @version 1.0.0
  *
- * @copyright Copyright (c) 2023 StilSoft
+ * @copyright Copyright (c) 2024 StilSoft
  *
  * MIT License:
  *
