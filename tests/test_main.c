@@ -201,6 +201,21 @@ START_TEST(GetCrcByReferencePack)
     ck_assert_uint_eq(pPackRef->uCrc, uCrc);
 }
 
+START_TEST(WriteCrcInMessageTail)
+{
+    const uint8_t uaPackDef[rmpONE_MESSAGE_SIZE_IN_BYTES] = {
+        0xAA, 0x55, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x07, 0xFF, 0xFA, 0x00, 0xB8, 0x20};
+
+    const uint8_t uaPackNoCrc[rmpONE_MESSAGE_SIZE_IN_BYTES] = {
+        0xAA, 0x55, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x07, 0xFF, 0xFA, 0x00, 0x00, 0x00};
+
+    RPM_WriteCrcInMessageTail((void*) uaPackNoCrc);
+
+    ck_assert_mem_eq(uaPackDef, uaPackNoCrc, sizeof(uaPackDef));
+}
+
 START_TEST(APIPutThenRead)
 {
     uint8_t *pSrc    = "Hello World!";
@@ -503,6 +518,7 @@ main(int argc, char *argv[], char *envp[])
         tcase_add_test(tc, CtorIfValid);
         tcase_add_test(tc, DtorIfNull);
         tcase_add_test(tc, GetCrcByReferencePack);
+        tcase_add_test(tc, WriteCrcInMessageTail);
         /*--------------------------------------------------------------------*/
 
         /* Добавить тестовый набор к тестовому объекту */

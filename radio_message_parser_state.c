@@ -207,6 +207,21 @@ RMP_GetPackCrc(void *pvMessage)
         CORE_GetCrc16_CCITT_Poly0x1021(&pPack->xPLoad, sizeof(pPack->xPLoad)));
 }
 
+
+/**
+ * @brief Функция записывает контрольную сумму сообщения в его конец.
+ *
+ * @note Поддерживаемые парсером сообщения имеют фиксированную длинну.
+ *
+ * @param[in,out] pvMessage: Указатель на начало сообщения.
+ */
+void RPM_WriteCrcInMessageTail(void *pvMessage)
+{
+    rmp_package_generic_t *pPack = (rmp_package_generic_t *) pvMessage;
+
+    pPack->uCrc = RMP_GetPackCrc(pvMessage);
+}
+
 rmpPRIVATE size_t
 RMP_Get(void *vObj, void *pDst, size_t uDstMemSize)
 {

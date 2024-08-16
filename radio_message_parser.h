@@ -416,6 +416,8 @@ RMP_SetState(void *vObj, rmp_state_e eNewState);
 extern rmp_state_e
 RMP_GetState(void *vObj);
 
+extern void RPM_WriteCrcInMessageTail(void *pvMessage);
+
 #if (rmpTEST_ENABLE == 1)
 extern rmpPRIVATE size_t
 RMP_Get(void *vObj, void *pDst, size_t uDstMemSize);
