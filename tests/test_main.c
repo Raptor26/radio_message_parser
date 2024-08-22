@@ -211,9 +211,18 @@ START_TEST(WriteCrcInMessageTail)
         0xAA, 0x55, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00, 0x07, 0xFF, 0xFA, 0x00, 0x00, 0x00};
 
-    RPM_WriteCrcInMessageTail((void*) uaPackNoCrc);
+    RPM_WriteCrcInMessageTail((void *) uaPackNoCrc);
 
     ck_assert_mem_eq(uaPackDef, uaPackNoCrc, sizeof(uaPackDef));
+}
+
+START_TEST(CheckCrcValidation)
+{
+    uint8_t uaPackDef[rmpONE_MESSAGE_SIZE_IN_BYTES] = {
+        0xAA, 0x55, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x23, 0x90, 0x59};
+
+    ck_assert_uint_eq(true, RMP_IsCrcValid((void *) uaPackDef));
 }
 
 START_TEST(APIPutThenRead)
@@ -519,6 +528,8 @@ main(int argc, char *argv[], char *envp[])
         tcase_add_test(tc, DtorIfNull);
         tcase_add_test(tc, GetCrcByReferencePack);
         tcase_add_test(tc, WriteCrcInMessageTail);
+        tcase_add_test(tc, CheckCrcValidation);
+
         /*--------------------------------------------------------------------*/
 
         /* Добавить тестовый набор к тестовому объекту */

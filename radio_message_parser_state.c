@@ -207,7 +207,6 @@ RMP_GetPackCrc(void *pvMessage)
         CORE_GetCrc16_CCITT_Poly0x1021(&pPack->xPLoad, sizeof(pPack->xPLoad)));
 }
 
-
 /**
  * @brief Функция записывает контрольную сумму сообщения в его конец.
  *
@@ -215,11 +214,34 @@ RMP_GetPackCrc(void *pvMessage)
  *
  * @param[in,out] pvMessage: Указатель на начало сообщения.
  */
-void RPM_WriteCrcInMessageTail(void *pvMessage)
+void
+RPM_WriteCrcInMessageTail(void *pvMessage)
 {
     rmp_package_generic_t *pPack = (rmp_package_generic_t *) pvMessage;
 
-    pPack->uCrc = RMP_GetPackCrc(pvMessage);
+    pPack->uCrc                  = RMP_GetPackCrc(pvMessage);
+}
+
+/**
+ * @brief Проверяет достоверность контрольной суммы пакета данных.
+ *
+ * @param[in]	pvMessage:
+ *
+ * @return - true в случае если контрольная сумма пакета достоверна.
+ * @return - false в противном случае.
+ */
+bool
+RMP_IsCrcValid(void *pvMessage)
+{
+    rmp_package_generic_t *pPack = (rmp_package_generic_t *) pvMessage;
+
+    bool bIsCrcValid             = false;
+
+    if (pPack->uCrc == RMP_GetPackCrc(pvMessage)) {
+        bIsCrcValid = true;
+    }
+
+    return bIsCrcValid;
 }
 
 rmpPRIVATE size_t
