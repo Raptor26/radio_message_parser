@@ -219,8 +219,8 @@ typedef struct __rmpPACKED
 {
     struct
     {
-        uint8_t uStartFrameFirstByte;
-        uint8_t uStartFrameSecondByte;
+        uint8_t uFirstByte;
+        uint8_t uSecondByte;
     } xHead;
 
     struct

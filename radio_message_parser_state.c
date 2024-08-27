@@ -166,8 +166,8 @@ RMP_WaitAndCopyMessage(void *vObj, void *pDst, size_t uDstMemSize)
         /* В буфере есть необходимое количество байт, требуется выполнить
          * копирование сообщения в целевую область памяти */
 
-        pDstPack->xHead.uStartFrameFirstByte  = rmpSTART_FRAME_FIRST_BYTE;
-        pDstPack->xHead.uStartFrameSecondByte = rmpSTART_FRAME_SECOND_BYTE;
+        pDstPack->xHead.uFirstByte  = rmpSTART_FRAME_FIRST_BYTE;
+        pDstPack->xHead.uSecondByte = rmpSTART_FRAME_SECOND_BYTE;
         RMP_Get(
             vObj,
             &pDstPack->xPLoad,
