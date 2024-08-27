@@ -207,7 +207,7 @@ START_TEST(WriteCrcInMessageTail)
         0xAA, 0x55, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00, 0x07, 0xFF, 0xFA, 0x00, 0xB8, 0x20};
 
-    const uint8_t uaPackNoCrc[rmpONE_MESSAGE_SIZE_IN_BYTES] = {
+    uint8_t uaPackNoCrc[rmpONE_MESSAGE_SIZE_IN_BYTES] = {
         0xAA, 0x55, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00, 0x07, 0xFF, 0xFA, 0x00, 0x00, 0x00};
 
@@ -337,13 +337,13 @@ START_TEST(FindStartFrameAndCopyMessage)
         hAPI->Put(hAPI, (void *) uaSrcMem, sizeof(uaSrcMem));
 
         /* Поиск и копирование сообщения в буфере */
-        uint8_t uaDstMem[rmpONE_MESSAGE_SIZE_IN_BYTES] = {0};
-        size_t  uReceiverMessageSize =
-            hAPI->Processing(hAPI, (void *) uaDstMem, sizeof(uaDstMem));
+        rmp_package_generic_t xDstMem = {0};
+        size_t                uReceiverMessageSize =
+            hAPI->Processing(hAPI, (void *) &xDstMem, sizeof(xDstMem));
 
         ck_assert_uint_eq(rmpONE_MESSAGE_SIZE_IN_BYTES, uReceiverMessageSize);
 
-        ck_assert_mem_eq(uaSrcMem, uaDstMem, sizeof(uaDstMem));
+        ck_assert_mem_eq(uaSrcMem, (void *) &xDstMem, sizeof(xDstMem));
 
         ck_assert_uint_eq(rmpSTATE_FIND_FIRST_BYTE, RMP_GetState(hAPI));
     } while (0);
@@ -361,16 +361,19 @@ START_TEST(FindStartFrameAndCopySomeMessages)
 
         RPM_WriteCrcInMessageTail((void *) uaSrcMem);
 
-        uint8_t uaDstMem[rmpONE_MESSAGE_SIZE_IN_BYTES] = {0};
+        rmp_package_generic_t xDstMem = {0};
         /* Побайтная запись в буфер и периодическое чтение сообщений */
         for (size_t i = 0u; i < sizeof(uaSrcMem); ++i) {
             hAPI->Put(hAPI, &uaSrcMem[i], 1u);
 
             size_t uReadMessageSize =
-                hAPI->Processing(hAPI, (void *) uaDstMem, sizeof(uaDstMem));
+                hAPI->Processing(hAPI, (void *) &xDstMem, sizeof(xDstMem));
 
             if (uReadMessageSize != 0u) {
-                ck_assert_mem_eq(pStartMessage, uaDstMem, sizeof(uaDstMem));
+                ck_assert_mem_eq(
+                    pStartMessage,
+                    (void *) &xDstMem,
+                    sizeof(xDstMem));
                 /* В буфере обнаружено первое сообщение, необходимо выйти из
                  * цикла
                  */
@@ -381,24 +384,24 @@ START_TEST(FindStartFrameAndCopySomeMessages)
 
     /* Сформируем второе сообщение, выполним побайтную запись и чтение */
     do {
-        uint8_t  uaSrcMem[256] = {0};
-        uint8_t *pStartMessage = (uint8_t *) &uaSrcMem[0];
-        pStartMessage[0]       = rmpSTART_FRAME_FIRST_BYTE;
-        pStartMessage[1]       = rmpSTART_FRAME_SECOND_BYTE;
-        pStartMessage[3]       = 123;
+        uint8_t uaSrcMem[256] = {0};
+        uaSrcMem[0]           = rmpSTART_FRAME_FIRST_BYTE;
+        uaSrcMem[1]           = rmpSTART_FRAME_SECOND_BYTE;
+        uaSrcMem[3]           = 123;
 
         RPM_WriteCrcInMessageTail((void *) uaSrcMem);
 
-        uint8_t uaDstMem[rmpONE_MESSAGE_SIZE_IN_BYTES] = {0};
+        rmp_package_generic_t xDstMem = {0};
+
         /* Побайтная запись в буфер и периодическое чтение сообщений */
         for (size_t i = 0u; i < sizeof(uaSrcMem); ++i) {
             hAPI->Put(hAPI, &uaSrcMem[i], 1u);
 
             size_t uReadMessageSize =
-                hAPI->Processing(hAPI, (void *) uaDstMem, sizeof(uaDstMem));
+                hAPI->Processing(hAPI, (void *) &xDstMem, sizeof(xDstMem));
 
             if (uReadMessageSize != 0u) {
-                ck_assert_mem_eq(pStartMessage, uaDstMem, sizeof(uaDstMem));
+                ck_assert_mem_eq(uaSrcMem, (void *) &xDstMem, sizeof(xDstMem));
                 /* В буфере обнаружено первое сообщение, необходимо выйти из
                  * цикла
                  */
@@ -409,23 +412,23 @@ START_TEST(FindStartFrameAndCopySomeMessages)
 
     /* Сформируем третье сообщение без контрольной суммы */
     do {
-        uint8_t uaSrcMem[128] = {0};
-        uaSrcMem[0]           = rmpSTART_FRAME_FIRST_BYTE;
-        uaSrcMem[1]           = rmpSTART_FRAME_SECOND_BYTE;
-        uaSrcMem[3]           = 1u;
-        uaSrcMem[4]           = 2u;
-        uaSrcMem[5]           = 3u;
-        uaSrcMem[6]           = 4u;
-        uaSrcMem[7]           = 5u;
+        uint8_t uaSrcMem[128]         = {0};
+        uaSrcMem[0]                   = rmpSTART_FRAME_FIRST_BYTE;
+        uaSrcMem[1]                   = rmpSTART_FRAME_SECOND_BYTE;
+        uaSrcMem[3]                   = 1u;
+        uaSrcMem[4]                   = 2u;
+        uaSrcMem[5]                   = 3u;
+        uaSrcMem[6]                   = 4u;
+        uaSrcMem[7]                   = 5u;
 
-        uint8_t uaDstMem[rmpONE_MESSAGE_SIZE_IN_BYTES] = {0};
+        rmp_package_generic_t xDstMem = {0};
 
         /* Побайтная запись в буфер и периодическое чтение сообщений */
         for (size_t i = 0u; i < sizeof(uaSrcMem); ++i) {
             hAPI->Put(hAPI, &uaSrcMem[i], 1u);
 
             size_t uReadMessageSize =
-                hAPI->Processing(hAPI, (void *) uaDstMem, sizeof(uaDstMem));
+                hAPI->Processing(hAPI, (void *) &xDstMem, sizeof(xDstMem));
 
             /* Сообщение не должно быть считано т.к. контрольная сумма не
              * достоверна */
@@ -442,11 +445,10 @@ START_TEST(FindStartFrameAndCopyMessageInSmallDstBuff)
 {
     /* Сформируем первое сообщение, выполним побайтную запись и чтение */
     do {
-        uint8_t  uaSrcMem[128] = {0};
-        uint8_t *pStartMessage = (uint8_t *) &uaSrcMem[0];
-        pStartMessage[0]       = rmpSTART_FRAME_FIRST_BYTE;
-        pStartMessage[1]       = rmpSTART_FRAME_SECOND_BYTE;
-        pStartMessage[3]       = 123;
+        uint8_t uaSrcMem[128] = {0};
+        uaSrcMem[0]           = rmpSTART_FRAME_FIRST_BYTE;
+        uaSrcMem[1]           = rmpSTART_FRAME_SECOND_BYTE;
+        uaSrcMem[3]           = 123;
 
         RPM_WriteCrcInMessageTail((void *) uaSrcMem);
 
@@ -465,10 +467,10 @@ START_TEST(FindStartFrameAndCopyMessageInSmallDstBuff)
         }
 
         /* Теперь выполним чтение в область памяти достаточного размера */
-        uint8_t uaBigDstMem[rmpONE_MESSAGE_SIZE_IN_BYTES] = {0};
+        rmp_package_generic_t xDstMem = {0};
         ck_assert_uint_eq(
             rmpONE_MESSAGE_SIZE_IN_BYTES,
-            hAPI->Processing(hAPI, (void *) uaBigDstMem, sizeof(uaBigDstMem)));
+            hAPI->Processing(hAPI, (void *) &xDstMem, sizeof(xDstMem)));
     } while (0);
 }
 
@@ -496,9 +498,9 @@ START_TEST(JoyCommand)
     hAPI->Put(hAPI, (void *) uaPackDef, sizeof(uaPackDef));
     RMP_SetState(hAPI, rmpSTATE_FIND_FIRST_BYTE);
 
-    uint8_t uaDstMem[rmpONE_MESSAGE_SIZE_IN_BYTES] = {0};
-    size_t  uReceiverMessageSize =
-        hAPI->Processing(hAPI, (void *) uaDstMem, sizeof(uaDstMem));
+    rmp_package_generic_t xDstMem = {0};
+    size_t                uReceiverMessageSize =
+        hAPI->Processing(hAPI, (void *) &xDstMem, sizeof(xDstMem));
 
     ck_assert_uint_eq(rmpONE_MESSAGE_SIZE_IN_BYTES, uReceiverMessageSize);
 }

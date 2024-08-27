@@ -154,24 +154,24 @@ RMP_FindSecondByte(void *vObj, void *pDst, size_t uDstMemSize)
 rmpPRIVATE rmp_return_code
 RMP_WaitAndCopyMessage(void *vObj, void *pDst, size_t uDstMemSize)
 {
-    rmp_data_handle_t hObj        = (rmp_data_handle_t) vObj;
-    rmp_return_code   eReturnCode = rmpBREAK;
+    rmp_data_handle_t      hObj        = (rmp_data_handle_t) vObj;
+    rmp_return_code        eReturnCode = rmpBREAK;
+    rmp_package_generic_t *pDstPack    = (rmp_package_generic_t *) pDst;
 
     /* Если размер целевой области памяти больше или равен минимально
      * допустимому размеру и в буфере находится необходимое количество байт */
-    if ((uDstMemSize >= rmpONE_MESSAGE_SIZE_IN_BYTES)
+    if ((uDstMemSize >= sizeof(rmp_package_generic_t))
         && (lwrb_get_full(&hObj->xLWRB)
-            >= (rmpONE_MESSAGE_SIZE_IN_BYTES - sizeof(rmpSTART_FRAME)))) {
+            >= (sizeof(rmp_package_generic_t) - sizeof(pDstPack->xHead)))) {
         /* В буфере есть необходимое количество байт, требуется выполнить
          * копирование сообщения в целевую область памяти */
 
-        uint8_t *pDstMemByte = (uint8_t *) pDst;
-        pDstMemByte[0]       = rmpSTART_FRAME_FIRST_BYTE;
-        pDstMemByte[1]       = rmpSTART_FRAME_SECOND_BYTE;
+        pDstPack->xHead.uStartFrameFirstByte  = rmpSTART_FRAME_FIRST_BYTE;
+        pDstPack->xHead.uStartFrameSecondByte = rmpSTART_FRAME_SECOND_BYTE;
         RMP_Get(
             vObj,
-            &pDstMemByte[sizeof(rmpSTART_FRAME)],
-            rmpONE_MESSAGE_SIZE_IN_BYTES - sizeof(rmpSTART_FRAME));
+            &pDstPack->xPLoad,
+            sizeof(pDstPack->xPLoad) + sizeof(pDstPack->uCrc));
 
         /* Сообщение найдено и скопировано, необходимо перейти в режим
          * поиска первого байта независимо от того достоверна контрольная сумма
@@ -205,7 +205,8 @@ RMP_GetPackCrc(void *pvMessage)
 /**
  * @brief Функция записывает контрольную сумму сообщения в его конец.
  *
- * @note Поддерживаемые библиотекой сообщения имеют фиксированную длину.
+ * @note Поддерживаемые библиотекой сообщения имеют фиксированную длину, равную
+ * rmpONE_MESSAGE_SIZE_IN_BYTES
  *
  * @param[in,out] pvMessage: Указатель на начало сообщения.
  */
