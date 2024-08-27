@@ -179,15 +179,10 @@ RMP_WaitAndCopyMessage(void *vObj, void *pDst, size_t uDstMemSize)
         RMP_SetState(vObj, rmpSTATE_FIND_FIRST_BYTE);
         /*--------------------------------------------------------------------*/
 
-        /* Проверка контрольной суммы */
-        uint8_t uCrc     = RMP_GetPackCrc(pDst);
-
-        uint8_t *pDstIdx = (uint8_t *) pDst;
-
-        if (uCrc
-            == pDstIdx[rmpONE_MESSAGE_SIZE_IN_BYTES - rmpCRC_SIZE_IN_BYTES]) {
+        if (RMP_IsCrcValid((void *) pDst)) {
             eReturnCode = rmpMESSAGE_COPIED;
         }
+
         /* if (uCrc
             == pDstIdx[rmpONE_MESSAGE_SIZE_IN_BYTES - rmpCRC_SIZE_IN_BYTES]) */
     }
@@ -210,7 +205,7 @@ RMP_GetPackCrc(void *pvMessage)
 /**
  * @brief Функция записывает контрольную сумму сообщения в его конец.
  *
- * @note Поддерживаемые парсером сообщения имеют фиксированную длинну.
+ * @note Поддерживаемые библиотекой сообщения имеют фиксированную длину.
  *
  * @param[in,out] pvMessage: Указатель на начало сообщения.
  */

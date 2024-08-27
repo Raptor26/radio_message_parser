@@ -331,8 +331,7 @@ START_TEST(FindStartFrameAndCopyMessage)
         uaSrcMem[1]  = rmpSTART_FRAME_SECOND_BYTE;
         uaSrcMem[10] = 123;
 
-        uaSrcMem[rmpONE_MESSAGE_SIZE_IN_BYTES - rmpCRC_SIZE_IN_BYTES] =
-            RMP_GetPackCrc((void *) &uaSrcMem[0]);
+        RPM_WriteCrcInMessageTail((void *) uaSrcMem);
 
         /* Запись сообщения в буфер */
         hAPI->Put(hAPI, (void *) uaSrcMem, sizeof(uaSrcMem));
@@ -360,8 +359,7 @@ START_TEST(FindStartFrameAndCopySomeMessages)
         pStartMessage[1]       = rmpSTART_FRAME_SECOND_BYTE;
         pStartMessage[3]       = 123;
 
-        pStartMessage[rmpONE_MESSAGE_SIZE_IN_BYTES - 1u] =
-            RMP_GetPackCrc((void *) uaSrcMem);
+        RPM_WriteCrcInMessageTail((void *) uaSrcMem);
 
         uint8_t uaDstMem[rmpONE_MESSAGE_SIZE_IN_BYTES] = {0};
         /* Побайтная запись в буфер и периодическое чтение сообщений */
@@ -389,8 +387,7 @@ START_TEST(FindStartFrameAndCopySomeMessages)
         pStartMessage[1]       = rmpSTART_FRAME_SECOND_BYTE;
         pStartMessage[3]       = 123;
 
-        pStartMessage[rmpONE_MESSAGE_SIZE_IN_BYTES - 1u] =
-            RMP_GetPackCrc((void *) uaSrcMem);
+        RPM_WriteCrcInMessageTail((void *) uaSrcMem);
 
         uint8_t uaDstMem[rmpONE_MESSAGE_SIZE_IN_BYTES] = {0};
         /* Побайтная запись в буфер и периодическое чтение сообщений */
@@ -451,8 +448,7 @@ START_TEST(FindStartFrameAndCopyMessageInSmallDstBuff)
         pStartMessage[1]       = rmpSTART_FRAME_SECOND_BYTE;
         pStartMessage[3]       = 123;
 
-        pStartMessage[rmpONE_MESSAGE_SIZE_IN_BYTES - rmpCRC_SIZE_IN_BYTES] =
-            RMP_GetPackCrc((void *) uaSrcMem);
+        RPM_WriteCrcInMessageTail((void *) uaSrcMem);
 
         /* Размера целевой области памяти недостаточно */
         uint8_t uaDstMem[rmpONE_MESSAGE_SIZE_IN_BYTES - 1u] = {0};
