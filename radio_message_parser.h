@@ -194,11 +194,6 @@
 #endif
 /*----------------------------------------------------------------------------*/
 
-#ifndef rmpSTART_FRAME
-    #define rmpSTART_FRAME ((uint16_t) (0xFFFF))
-#endif
-/*----------------------------------------------------------------------------*/
-
 #ifndef rmpSTART_FRAME_FIRST_BYTE
     #define rmpSTART_FRAME_FIRST_BYTE ((uint8_t) 0xAA)
 #endif
@@ -212,8 +207,6 @@
     #define rmpONE_MESSAGE_SIZE_IN_BYTES (20)
 #endif
 /*----------------------------------------------------------------------------*/
-
-#define rmpCRC_SIZE_IN_BYTES (2)
 
 typedef struct __rmpPACKED
 {
