@@ -4,7 +4,7 @@ set(project_description_str "Radio message parser library for Albatros")
 
 project(
   radio_message_parser
-  VERSION 1.0.1
+  VERSION 1.0.2
   DESCRIPTION ${project_description_str}
   LANGUAGES C)
 

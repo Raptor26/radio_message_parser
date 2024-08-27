@@ -44,6 +44,9 @@ RMP - Radio Message Parser
 Наиболее актуальный пример использования библиотеки вы можете найти в `tests/test_main.c` в функции `START_TEST(ExampleForMAN)`
 
 ```c
+
+#include "radio_message_parser.h"
+
 int main(void)
 {
     // Объявление дескриптора API. Валидный адрес буфер записан при вызове

@@ -6,7 +6,7 @@
  * программную реализацию парсера сообщений фиксированной длины и предназначена
  * для выполнения в стиле <Bare Metal>.
  *
- * @version 1.0.1
+ * @version 1.0.2
  *
  * @details
  * NAME
@@ -217,8 +217,11 @@
 
 typedef struct __rmpPACKED
 {
-    uint8_t uStartFrameFirstByte;
-    uint8_t uStartFrameSecondByte;
+    struct
+    {
+        uint8_t uStartFrameFirstByte;
+        uint8_t uStartFrameSecondByte;
+    } xHead;
 
     struct
     {
@@ -415,6 +418,12 @@ RMP_SetState(void *vObj, rmp_state_e eNewState);
 
 extern rmp_state_e
 RMP_GetState(void *vObj);
+
+extern void
+RPM_WriteCrcInMessageTail(void *pvMessage);
+
+extern bool
+RMP_IsCrcValid(void *pvMessage);
 
 #if (rmpTEST_ENABLE == 1)
 extern rmpPRIVATE size_t
