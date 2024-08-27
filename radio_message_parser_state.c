@@ -253,16 +253,16 @@ RMP_SetState(void *vObj, rmp_state_e eNewState)
 {
     rmp_data_handle_t hObj  = (rmp_data_handle_t) vObj;
 
-    bool bIsStateWasUpdates = false;
+    bool bIsStateWasUpdated = false;
 
     if (eNewState < rmpSTATE_MAX_NUMB) {
         hObj->eState       = eNewState;
 
-        bIsStateWasUpdates = true;
+        bIsStateWasUpdated = true;
     }
     /* if (eNewState < rmpSTATE_MAX_NUMB) */
 
-    return (bIsStateWasUpdates);
+    return (bIsStateWasUpdated);
 }
 
 rmp_state_e
