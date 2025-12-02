@@ -87,7 +87,7 @@ prvProcessing(void *vObj, void *pDst, size_t uDstMemSize)
             hObj->xStateAPI.aFn[RMP_GetState(vObj)](vObj, pDst, uDstMemSize);
 
         if (eReturnCode == rmpMESSAGE_COPIED) {
-            uRxMessageSize = rmpONE_MESSAGE_SIZE_IN_BYTES;
+            uRxMessageSize = RMP_GetMessageSize(vObj);
         }
     } while (eReturnCode == rmpIN_PROGRESS);
 
