@@ -56,7 +56,7 @@ rmpPRIVATE uint16_t
 CORE_GetCrc16_CCITT_Poly0x1021(const void *pSrc, size_t uLen);
 
 rmpPRIVATE uint16_t
-RMP_GetPackCrc(void *pvMessage);
+RMP_GetPackCrc(void *vObj, void *pvMessage);
 #endif
 
 rmp_state_api_handle_t
@@ -159,10 +159,11 @@ RMP_WaitAndCopyMessage(void *vObj, void *pDst, size_t uDstMemSize)
     rmp_package_generic_t *pDstPack    = (rmp_package_generic_t *) pDst;
 
     /* Если размер целевой области памяти больше или равен минимально
-     * допустимому размеру и в буфере находится необходимое количество байт */
-    if ((uDstMemSize >= sizeof(rmp_package_generic_t))
+     * допустимому размеру и в буфере находится необходимое количество байт
+     */
+    if ((uDstMemSize >= hObj->uOneMessageSize)
         && (lwrb_get_full(&hObj->xLWRB)
-            >= (sizeof(rmp_package_generic_t) - sizeof(pDstPack->xHead)))) {
+            >= hObj->uOneMessageSize - sizeof(pDstPack->xHead))) {
         /* В буфере есть необходимое количество байт, требуется выполнить
          * копирование сообщения в целевую область памяти */
 
@@ -171,7 +172,7 @@ RMP_WaitAndCopyMessage(void *vObj, void *pDst, size_t uDstMemSize)
         RMP_Get(
             vObj,
             &pDstPack->xPLoad,
-            sizeof(pDstPack->xPLoad) + sizeof(pDstPack->uCrc));
+            hObj->uOneMessageSize + sizeof(uint16_t));
 
         /* Сообщение найдено и скопировано, необходимо перейти в режим
          * поиска первого байта независимо от того достоверна контрольная сумма
@@ -179,7 +180,7 @@ RMP_WaitAndCopyMessage(void *vObj, void *pDst, size_t uDstMemSize)
         RMP_SetState(vObj, rmpSTATE_FIND_FIRST_BYTE);
         /*--------------------------------------------------------------------*/
 
-        if (RMP_IsCrcValid((void *) pDst)) {
+        if (RMP_IsCrcValid(vObj, (void *) pDst)) {
             eReturnCode = rmpMESSAGE_COPIED;
         }
 
@@ -194,12 +195,15 @@ RMP_WaitAndCopyMessage(void *vObj, void *pDst, size_t uDstMemSize)
 }
 
 rmpPRIVATE uint16_t
-RMP_GetPackCrc(void *pvMessage)
+RMP_GetPackCrc(void *vObj, void *pvMessage)
 {
-    rmp_package_generic_t *pPack = (rmp_package_generic_t *) pvMessage;
+    rmp_data_handle_t hObj   = (rmp_data_handle_t) vObj;
+    uint8_t          *pPack  = (uint8_t *) pvMessage;
+    uint16_t         *pPload = (uint16_t *) &pPack[sizeof(uint16_t)];
+    const size_t      uPloadSize =
+        hObj->uOneMessageSize - sizeof(uint16_t) - sizeof(uint16_t);
 
-    return (
-        CORE_GetCrc16_CCITT_Poly0x1021(&pPack->xPLoad, sizeof(pPack->xPLoad)));
+    return (CORE_GetCrc16_CCITT_Poly0x1021(pPload, uPloadSize));
 }
 
 /**
@@ -211,11 +215,13 @@ RMP_GetPackCrc(void *pvMessage)
  * @param[in,out] pvMessage: Указатель на начало сообщения.
  */
 void
-RPM_WriteCrcInMessageTail(void *pvMessage)
+RPM_WriteCrcInMessageTail(void *vObj, void *pvMessage)
 {
-    rmp_package_generic_t *pPack = (rmp_package_generic_t *) pvMessage;
-
-    pPack->uCrc                  = RMP_GetPackCrc(pvMessage);
+    rmp_data_handle_t hObj  = (rmp_data_handle_t) vObj;
+    uint8_t          *pPack = (uint8_t *) pvMessage;
+    uint16_t         *uCrc =
+        (uint16_t *) &pPack[hObj->uOneMessageSize - sizeof(uint16_t)];
+    *uCrc = RMP_GetPackCrc(vObj, pvMessage);
 }
 
 /**
@@ -227,17 +233,27 @@ RPM_WriteCrcInMessageTail(void *pvMessage)
  * @return - false в противном случае.
  */
 bool
-RMP_IsCrcValid(void *pvMessage)
+RMP_IsCrcValid(void *vObj, void *pvMessage)
 {
-    rmp_package_generic_t *pPack = (rmp_package_generic_t *) pvMessage;
+    rmp_data_handle_t hObj  = (rmp_data_handle_t) vObj;
+    uint8_t          *pPack = (uint8_t *) pvMessage;
+    uint16_t         *uCrc =
+        (uint16_t *) &pPack[hObj->uOneMessageSize - sizeof(uint16_t)];
 
-    bool bIsCrcValid             = false;
+    bool bIsCrcValid = false;
 
-    if (pPack->uCrc == RMP_GetPackCrc(pvMessage)) {
+    if (*uCrc == RMP_GetPackCrc(vObj, pvMessage)) {
         bIsCrcValid = true;
     }
 
     return bIsCrcValid;
+}
+
+size_t
+RMP_GetMessageSize(void *vObj)
+{
+    rmp_data_handle_t hObj = (rmp_data_handle_t) vObj;
+    return hObj->uOneMessageSize;
 }
 
 rmpPRIVATE size_t

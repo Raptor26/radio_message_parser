@@ -50,6 +50,8 @@ RMP_StructInit(rmp_init_t *pxInit)
     memset((void *) pxInit, 0, sizeof(rmp_init_t));
 
     pxInit->uReadBytesThreshold = rmpONE_MESSAGE_SIZE_IN_BYTES * 2;
+
+    pxInit->uOneMessageSize     = rmpONE_MESSAGE_SIZE_IN_BYTES;
 }
 
 /**
@@ -79,6 +81,10 @@ RMP_Ctor(rmp_init_t *pxInit)
         return (NULL);
     }
 
+    if (pxInit->uOneMessageSize == 0u) {
+        return (NULL);
+    }
+
     bool bIsCtorErrorDetect = false;
 
     rmp_data_handle_t hData = pxInit->hData;
@@ -86,6 +92,9 @@ RMP_Ctor(rmp_init_t *pxInit)
     /*------------------------------------------------------------------------*/
 
     hData->uReadBytesThreshold = pxInit->uReadBytesThreshold;
+    /*------------------------------------------------------------------------*/
+
+    hData->uOneMessageSize = pxInit->uOneMessageSize;
     /*------------------------------------------------------------------------*/
 
     if (lwrb_init(

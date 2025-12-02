@@ -214,18 +214,16 @@ extern "C" {
 
 typedef struct __rmpPACKED
 {
-    struct
-    {
-        uint8_t uFirstByte;
-        uint8_t uSecondByte;
-    } xHead;
+    uint8_t uFirstByte;
+    uint8_t uSecondByte;
+} rmp_package_head_t;
 
-    struct
-    {
-        uint8_t uDummy[16];
-    } xPLoad;
+typedef struct __rmpPACKED
+{
+    rmp_package_head_t xHead;
 
-    uint16_t uCrc;
+    uint8_t xPLoad;
+
 } rmp_package_generic_t;
 
 typedef enum
@@ -353,6 +351,12 @@ typedef struct
      * прерыванием цикла поиска начала сообщения.
      */
     size_t uReadBytesThreshold;
+
+    /**
+     * @brief Размер одного сообщения. По умолчанию равен
+     * rmpONE_MESSAGE_SIZE_IN_BYTES.
+     */
+    size_t uOneMessageSize;
 } rmp_obj_t;
 
 typedef rmp_obj_t *rmp_data_handle_t;
@@ -399,6 +403,12 @@ typedef struct
      * прерыванием цикла поиска начала сообщения.
      */
     size_t uReadBytesThreshold;
+
+    /**
+     * @brief Размер одного сообщения. По умолчанию равен
+     * rmpONE_MESSAGE_SIZE_IN_BYTES.
+     */
+    size_t uOneMessageSize;
 } rmp_init_t;
 
 extern void
@@ -417,10 +427,13 @@ extern rmp_state_e
 RMP_GetState(void *vObj);
 
 extern void
-RPM_WriteCrcInMessageTail(void *pvMessage);
+RPM_WriteCrcInMessageTail(void *vObj, void *pvMessage);
 
 extern bool
-RMP_IsCrcValid(void *pvMessage);
+RMP_IsCrcValid(void *vObj, void *pvMessage);
+
+extern size_t
+RMP_GetMessageSize(void *vObj);
 
 #if (rmpTEST_ENABLE == 1)
 extern rmpPRIVATE size_t
@@ -439,7 +452,7 @@ extern rmpPRIVATE uint16_t
 CORE_GetCrc16_CCITT_Poly0x1021(const void *pSrc, size_t uLen);
 
 extern rmpPRIVATE uint16_t
-RMP_GetPackCrc(void *pvMessage);
+RMP_GetPackCrc(void *vObj, void *pvMessage);
 #endif
 
 #ifdef __cplusplus
