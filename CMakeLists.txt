@@ -31,14 +31,14 @@ target_include_directories(${PROJECT_NAME}
 if(NEED_EMBEDDED_LWRB)
   add_subdirectory(lwrb)
   target_link_libraries(${PROJECT_NAME} PUBLIC lwrb)
-  target_include_directories(
-    radio_message_parser
-    PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/lwrb/lwrb/src/include/lwrb/")
 else()
   # Если переменная NEED_EMBEDDED_LWRB не определена, то пользовательский
   # CMakeLists.txt должен самостоятельно вызвать следующие команды:
-  # target_sources(radio_message_parser PRIVATE path_to_lwrb/lwrb.c)
-  # target_include_directories(radio_message_parser PUBLIC "${PATH_TO_LWRB}/")
+  #[=[
+    if(TARGET lwrb)
+        target_link_libraries(radio_message_parser PUBLIC lwrb)
+    endif()
+  ]=]
 endif()
 
 target_include_directories(radio_message_parser

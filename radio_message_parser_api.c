@@ -34,7 +34,7 @@
  */
 
 #include "radio_message_parser.h"
-#include "lwrb.h"
+#include "lwrb/lwrb.h"
 
 static size_t
 prvPut(void *vObj, void *pSrc, size_t uBytesNumb);

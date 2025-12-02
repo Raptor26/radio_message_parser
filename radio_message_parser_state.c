@@ -34,7 +34,7 @@
  */
 
 #include "radio_message_parser.h"
-#include "lwrb.h"
+#include "lwrb/lwrb.h"
 
 #if (rmpTEST_ENABLE != 1)
 rmpPRIVATE rmp_return_code

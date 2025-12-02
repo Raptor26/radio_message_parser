@@ -177,7 +177,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include "lwrb.h"
+#include "lwrb/lwrb.h"
 
 #if defined(__GNUC__)
     #ifndef __rmpPACKED
@@ -207,6 +207,10 @@
     #define rmpONE_MESSAGE_SIZE_IN_BYTES (20)
 #endif
 /*----------------------------------------------------------------------------*/
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct __rmpPACKED
 {
@@ -436,6 +440,10 @@ CORE_GetCrc16_CCITT_Poly0x1021(const void *pSrc, size_t uLen);
 
 extern rmpPRIVATE uint16_t
 RMP_GetPackCrc(void *pvMessage);
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif /* RADIO_MESSAGE_PARSER_H */
