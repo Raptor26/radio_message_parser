@@ -37,10 +37,10 @@
 #include "lwrb/lwrb.h"
 
 static size_t
-prvPut(void *vObj, void *pSrc, size_t uBytesNumb);
+prvPut(void *vObj, const void *pSrc, size_t uBytesNumb);
 
 static size_t
-prvPutISR(void *vObj, void *pSrc, size_t uBytesNumb);
+prvPutISR(void *vObj, const void *pSrc, size_t uBytesNumb);
 
 static size_t
 prvProcessing(void *vObj, void *pDst, size_t uDstMemSize);
@@ -62,7 +62,7 @@ RMP_InitAPI(void *vObj)
 }
 
 static size_t
-prvPut(void *vObj, void *pSrc, size_t uBytesNumb)
+prvPut(void *vObj, const void *pSrc, size_t uBytesNumb)
 {
     rmp_data_handle_t hObj = (rmp_data_handle_t) vObj;
 
@@ -70,7 +70,7 @@ prvPut(void *vObj, void *pSrc, size_t uBytesNumb)
 }
 
 static size_t
-prvPutISR(void *vObj, void *pSrc, size_t uBytesNumb)
+prvPutISR(void *vObj, const void *pSrc, size_t uBytesNumb)
 {
     return (prvPut(vObj, pSrc, uBytesNumb));
 }

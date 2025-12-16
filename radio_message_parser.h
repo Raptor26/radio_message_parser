@@ -276,9 +276,9 @@ typedef struct
      * @return Количество записанных байт в кольцевой буфер. В случае успешной
      * записи, возвращаемое значение равняется <uBytesNumb.
      */
-    size_t (*Put)(void *vObj, void *pSrc, size_t uBytesNumb);
+    size_t (*Put)(void *vObj, const void *pSrc, size_t uBytesNumb);
 
-    size_t (*PutISR)(void *vObj, void *pSrc, size_t uBytesNumb);
+    size_t (*PutISR)(void *vObj, const void *pSrc, size_t uBytesNumb);
 
     /**
      * @brief Обработчик байт в кольцевом буфере. Если в процессе обработки
