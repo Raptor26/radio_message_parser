@@ -81,7 +81,8 @@ RMP_FindFirstByte(void *vObj, void *pDst, size_t uDstMemSize)
 
     rmp_data_handle_t hObj          = (rmp_data_handle_t) vObj;
     size_t            uReadBytesCnt = 0u;
-    uint8_t           uOneByte;
+    (void) uReadBytesCnt;
+    uint8_t uOneByte;
 
     rmp_return_code eReturnCode = rmpBREAK;
 
