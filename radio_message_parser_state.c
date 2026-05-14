@@ -173,7 +173,7 @@ RMP_WaitAndCopyMessage(void *vObj, void *pDst, size_t uDstMemSize)
         RMP_Get(
             vObj,
             &pDstPack->xPLoad,
-            hObj->uOneMessageSize + sizeof(uint16_t));
+            hObj->uOneMessageSize - sizeof(pDstPack->xHead));
 
         /* Сообщение найдено и скопировано, необходимо перейти в режим
          * поиска первого байта независимо от того достоверна контрольная сумма
