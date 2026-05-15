@@ -187,7 +187,7 @@
     #error "You must define __rmpPACKED for your compiler"
 #endif
 
-#if (rmpTEST_ENABLE == 1)
+#ifdef rmpTEST_ENABLE
     #define rmpPRIVATE
 #else
     #define rmpPRIVATE static
@@ -435,7 +435,7 @@ RMP_IsCrcValid(void *vObj, void *pvMessage);
 extern size_t
 RMP_GetMessageSize(void *vObj);
 
-#if (rmpTEST_ENABLE == 1)
+#ifdef rmpTEST_ENABLE
 extern rmpPRIVATE size_t
 RMP_Get(void *vObj, void *pDst, size_t uDstMemSize);
 
