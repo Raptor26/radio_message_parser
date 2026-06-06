@@ -81,7 +81,6 @@ RMP_FindFirstByte(void *vObj, void *pDst, size_t uDstMemSize)
 
     rmp_data_handle_t hObj          = (rmp_data_handle_t) vObj;
     size_t            uReadBytesCnt = 0u;
-    (void) uReadBytesCnt;
     uint8_t uOneByte;
 
     rmp_return_code eReturnCode = rmpBREAK;
@@ -114,7 +113,7 @@ RMP_FindFirstByte(void *vObj, void *pDst, size_t uDstMemSize)
         /* if (uOneByte == rmpSTART_FRAME_FIRST_BYTE) */
 
         /* Считано больше байт чем разрешено за один вызов Processing() */
-        if (uReadBytesNumb > hObj->uReadBytesThreshold) {
+        if (uReadBytesCnt >= hObj->uReadBytesThreshold) {
             break;
         }
     }
@@ -216,7 +215,7 @@ RMP_GetPackCrc(void *vObj, void *pvMessage)
  * @param[in,out] pvMessage: Указатель на начало сообщения.
  */
 void
-RPM_WriteCrcInMessageTail(void *vObj, void *pvMessage)
+RMP_WriteCrcInMessageTail(void *vObj, void *pvMessage)
 {
     rmp_data_handle_t hObj  = (rmp_data_handle_t) vObj;
     uint8_t          *pPack = (uint8_t *) pvMessage;

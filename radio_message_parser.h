@@ -427,7 +427,7 @@ extern rmp_state_e
 RMP_GetState(void *vObj);
 
 extern void
-RPM_WriteCrcInMessageTail(void *vObj, void *pvMessage);
+RMP_WriteCrcInMessageTail(void *vObj, void *pvMessage);
 
 extern bool
 RMP_IsCrcValid(void *vObj, void *pvMessage);

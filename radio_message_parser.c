@@ -85,6 +85,15 @@ RMP_Ctor(rmp_init_t *pxInit)
         return (NULL);
     }
 
+    if (pxInit->uOneMessageSize
+        < (sizeof(rmp_package_head_t) + sizeof(uint16_t))) {
+        return (NULL);
+    }
+
+    if (pxInit->uReadBytesThreshold == 0u) {
+        return (NULL);
+    }
+
     bool bIsCtorErrorDetect = false;
 
     rmp_data_handle_t hData = pxInit->hData;

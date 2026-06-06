@@ -10,6 +10,13 @@ pkg_search_module(CHECK Check)
 if(CHECK_LIBRARIES)
   add_executable(test_radio_message_parser test_main.c)
 
+  target_include_directories(test_radio_message_parser
+                             PRIVATE ${CHECK_INCLUDE_DIRS})
+  target_compile_options(test_radio_message_parser
+                         PRIVATE ${CHECK_CFLAGS_OTHER})
+  target_link_directories(test_radio_message_parser
+                          PRIVATE ${CHECK_LIBRARY_DIRS})
+
   target_link_libraries(test_radio_message_parser PRIVATE radio_message_parser
                                                           ${CHECK_LIBRARIES})
 

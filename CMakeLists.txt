@@ -44,7 +44,7 @@ endif()
 target_include_directories(radio_message_parser
                            PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/")
 
-if(UTEST_ENABLE)
+if(UTEST_ENABLE OR UTEST)
   include(CTest)
   enable_testing()
   target_compile_definitions(${PROJECT_NAME} PUBLIC -DrmpTEST_ENABLE=1
