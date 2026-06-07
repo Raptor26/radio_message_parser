@@ -200,10 +200,11 @@ RMP_WriteCrcInMessageTail(void *vObj, void *pvMessage)
 /**
  * @brief Проверяет достоверность контрольной суммы пакета данных.
  *
- * @param[in]	pvMessage:
+ * @param[in] vObj: Указатель на объект обработчика сообщений.
+ * @param[in] pvMessage: Указатель на начало сообщения.
  *
- * @return - true в случае если контрольная сумма пакета достоверна.
- * @return - false в противном случае.
+ * @return true в случае если контрольная сумма пакета достоверна.
+ * @return false в противном случае.
  */
 bool
 RMP_IsCrcValid(void *vObj, void *pvMessage)
@@ -222,6 +223,13 @@ RMP_IsCrcValid(void *vObj, void *pvMessage)
     return (bIsCrcValid);
 }
 
+/**
+ * @brief Возвращает размер одного сообщения в байтах.
+ *
+ * @param[in] vObj: Указатель на объект обработчика сообщений.
+ *
+ * @return Размер сообщения.
+ */
 size_t
 RMP_GetMessageSize(void *vObj)
 {
@@ -237,6 +245,15 @@ RMP_Get(void *vObj, void *pDst, size_t uDstMemSize)
     return (lwrb_read(&hObj->xLWRB, pDst, uDstMemSize));
 }
 
+/**
+ * @brief Устанавливает состояние конечного автомата парсера.
+ *
+ * @param[out] vObj: Указатель на объект обработчика сообщений.
+ * @param[in] eNewState: Новое состояние конечного автомата.
+ *
+ * @return true если состояние изменено; false если передано недопустимое
+ * состояние.
+ */
 bool
 RMP_SetState(void *vObj, rmp_state_e eNewState)
 {
@@ -254,6 +271,13 @@ RMP_SetState(void *vObj, rmp_state_e eNewState)
     return (bIsStateWasUpdated);
 }
 
+/**
+ * @brief Возвращает текущее состояние конечного автомата парсера.
+ *
+ * @param[in] vObj: Указатель на объект обработчика сообщений.
+ *
+ * @return Текущее состояние конечного автомата.
+ */
 rmp_state_e
 RMP_GetState(void *vObj)
 {

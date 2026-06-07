@@ -135,6 +135,13 @@ RMP_Ctor(rmp_init_t *pxInit)
     return (hAPI);
 }
 
+/**
+ * @brief Деструктор экземпляра <RMP>.
+ *
+ * @param[in] hAPI: Дескриптор API, полученный при вызове RMP_Ctor().
+ *
+ * @return true если объект был уничтожен; false если передан NULL.
+ */
 bool
 RMP_Dtor(rmp_api_handle_t hAPI)
 {
