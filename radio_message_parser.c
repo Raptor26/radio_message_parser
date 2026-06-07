@@ -100,6 +100,9 @@ RMP_Ctor(rmp_init_t *pxInit)
     memset((void *) hData, 0, sizeof(rmp_obj_t));
     /*------------------------------------------------------------------------*/
 
+    hData->eState = rmpSTATE_FIND_START_FRAME;
+    /*------------------------------------------------------------------------*/
+
     hData->uReadBytesThreshold = pxInit->uReadBytesThreshold;
     /*------------------------------------------------------------------------*/
 

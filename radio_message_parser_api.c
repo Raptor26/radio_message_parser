@@ -102,7 +102,7 @@ prvReset(void *vObj)
     size_t uBytesNumbInBuffBeforReset = lwrb_get_full(&hObj->xLWRB);
     lwrb_reset(&hObj->xLWRB);
 
-    RMP_SetState(vObj, rmpSTATE_FIND_FIRST_BYTE);
+    RMP_SetState(vObj, rmpSTATE_FIND_START_FRAME);
 
     return (uBytesNumbInBuffBeforReset);
 }

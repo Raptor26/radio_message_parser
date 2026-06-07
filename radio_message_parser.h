@@ -228,8 +228,7 @@ typedef struct __rmpPACKED
 
 typedef enum
 {
-    rmpSTATE_FIND_FIRST_BYTE = 0,
-    rmpSTATE_FIND_SECOND_BYTE,
+    rmpSTATE_FIND_START_FRAME = 0,
     rmpSTATE_WAIT_AND_COPY_MESSAGE,
 
     rmpSTATE_MAX_NUMB,
@@ -440,10 +439,7 @@ extern rmpPRIVATE size_t
 RMP_Get(void *vObj, void *pDst, size_t uDstMemSize);
 
 extern rmpPRIVATE rmp_return_code
-RMP_FindFirstByte(void *vObj, void *pDst, size_t uDstMemSize);
-
-extern rmpPRIVATE rmp_return_code
-RMP_FindSecondByte(void *vObj, void *pDst, size_t uDstMemSize);
+RMP_FindStartFrame(void *vObj, void *pDst, size_t uDstMemSize);
 
 extern rmpPRIVATE rmp_return_code
 RMP_WaitAndCopyMessage(void *vObj, void *pDst, size_t uDstMemSize);

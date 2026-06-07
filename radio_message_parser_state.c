@@ -38,10 +38,7 @@
 
 #if (rmpTEST_ENABLE != 1)
 rmpPRIVATE rmp_return_code
-RMP_FindFirstByte(void *vObj, void *pDst, size_t uDstMemSize);
-
-rmpPRIVATE rmp_return_code
-RMP_FindSecondByte(void *vObj, void *pDst, size_t uDstMemSize);
+RMP_FindStartFrame(void *vObj, void *pDst, size_t uDstMemSize);
 
 rmpPRIVATE rmp_return_code
 RMP_WaitAndCopyMessage(void *vObj, void *pDst, size_t uDstMemSize);
@@ -62,10 +59,9 @@ RMP_GetPackCrc(void *vObj, void *pvMessage);
 rmp_state_api_handle_t
 RMP_InitStateAPI(void *vObj)
 {
-    rmp_data_handle_t hObj                         = (rmp_data_handle_t) vObj;
+    rmp_data_handle_t hObj = (rmp_data_handle_t) vObj;
 
-    hObj->xStateAPI.aFn[rmpSTATE_FIND_FIRST_BYTE]  = RMP_FindFirstByte;
-    hObj->xStateAPI.aFn[rmpSTATE_FIND_SECOND_BYTE] = RMP_FindSecondByte;
+    hObj->xStateAPI.aFn[rmpSTATE_FIND_START_FRAME] = RMP_FindStartFrame;
 
     hObj->xStateAPI.aFn[rmpSTATE_WAIT_AND_COPY_MESSAGE] =
         RMP_WaitAndCopyMessage;
@@ -74,78 +70,51 @@ RMP_InitStateAPI(void *vObj)
 }
 
 rmpPRIVATE rmp_return_code
-RMP_FindFirstByte(void *vObj, void *pDst, size_t uDstMemSize)
+RMP_FindStartFrame(void *vObj, void *pDst, size_t uDstMemSize)
 {
     (void) pDst;
     (void) uDstMemSize;
 
     rmp_data_handle_t hObj          = (rmp_data_handle_t) vObj;
-    size_t            uReadBytesCnt = 0u;
-    uint8_t uOneByte;
+    rmp_return_code   eReturnCode   = rmpBREAK;
 
-    rmp_return_code eReturnCode = rmpBREAK;
+    size_t            uBytesSkipped = 0u;
 
-    /* Циклический поиск байта начала сообщения */
-    while (1) {
-        /* Поиск первого байта начала пакета данных */
-        uOneByte = 0u;
+    /* Поиск стартового кадра через peek — без удаления байт из буфера
+     * до подтверждения валидности заголовка */
+    while (lwrb_get_full(&hObj->xLWRB) >= sizeof(rmp_package_head_t)) {
+        rmp_package_head_t xHead;
+        lwrb_peek(&hObj->xLWRB, 0, &xHead, sizeof(xHead));
 
-        size_t uReadBytesNumb =
-            lwrb_read(&hObj->xLWRB, &uOneByte, sizeof(uOneByte));
-
-        uReadBytesCnt += uReadBytesNumb;
-
-        /* В буфере нет байт, необходимо принудительно выйти из цикла */
-        if (uReadBytesNumb == 0u) {
-            break;
-        }
-        /*--------------------------------------------------------------------*/
-
-        /* Если обнаружен первый байт */
-        if (uOneByte == rmpSTART_FRAME_FIRST_BYTE) {
-            /* Переход в состояние поиска 2-го байта */
-            RMP_SetState(vObj, rmpSTATE_FIND_SECOND_BYTE);
-
+        /* Если обнаружен валидный стартовый кадр */
+        if ((xHead.uFirstByte == rmpSTART_FRAME_FIRST_BYTE)
+            && (xHead.uSecondByte == rmpSTART_FRAME_SECOND_BYTE)) {
+            /* Пропускаем заголовок из буфера, переходим к чтению сообщения */
+            lwrb_skip(&hObj->xLWRB, sizeof(xHead));
+            RMP_SetState(vObj, rmpSTATE_WAIT_AND_COPY_MESSAGE);
             eReturnCode = rmpIN_PROGRESS;
-
             break;
         }
-        /* if (uOneByte == rmpSTART_FRAME_FIRST_BYTE) */
+
+        /* Невалидный заголовок — пропускаем один байт и продолжаем поиск */
+        lwrb_skip(&hObj->xLWRB, 1);
+        ++uBytesSkipped;
 
         /* Считано больше байт чем разрешено за один вызов Processing() */
-        if (uReadBytesCnt >= hObj->uReadBytesThreshold) {
+        if (uBytesSkipped >= hObj->uReadBytesThreshold) {
             break;
         }
     }
-    /* while (bIsFindFirstByte) */
+    /* while (lwrb_get_full >= sizeof(head)) */
 
-    return (eReturnCode);
-}
-
-rmpPRIVATE rmp_return_code
-RMP_FindSecondByte(void *vObj, void *pDst, size_t uDstMemSize)
-{
-    (void) pDst;
-    (void) uDstMemSize;
-
-    uint8_t         uOneByte    = 0u;
-    rmp_return_code eReturnCode = rmpIN_PROGRESS;
-
-    size_t uReadBytesNumb       = RMP_Get(vObj, &uOneByte, sizeof(uOneByte));
-
-    /* В буфер еще не записаны данные */
-    if (uReadBytesNumb == 0) {
-        /* Необходимо вернуть код статуса, при получении которого Processing()
-         * выйдет из обработки и вернет управление вызывающей функции. Данное
-         * условие не означает что за первым байтом не следует второго, это
-         * означает что пока в буфере нет данных и, при их получении, необходимо
-         * повторить попытку чтения 2-го байта */
-        eReturnCode = rmpBREAK;
-    } else if (
-        (uReadBytesNumb == 1u) && (uOneByte == rmpSTART_FRAME_SECOND_BYTE)) {
-        RMP_SetState(vObj, rmpSTATE_WAIT_AND_COPY_MESSAGE);
-    } else {
-        RMP_SetState(vObj, rmpSTATE_FIND_FIRST_BYTE);
+    /* Если в буфере остался ровно 1 байт и это не первый байт стартового
+     * кадра — пропускаем его, иначе оставляем на случай прихода 0x55 */
+    if (lwrb_get_full(&hObj->xLWRB) == 1u) {
+        uint8_t uOneByte;
+        lwrb_peek(&hObj->xLWRB, 0, &uOneByte, sizeof(uOneByte));
+        if (uOneByte != rmpSTART_FRAME_FIRST_BYTE) {
+            lwrb_skip(&hObj->xLWRB, 1);
+        }
     }
 
     return (eReturnCode);
@@ -165,27 +134,31 @@ RMP_WaitAndCopyMessage(void *vObj, void *pDst, size_t uDstMemSize)
         && (lwrb_get_full(&hObj->xLWRB)
             >= hObj->uOneMessageSize - sizeof(pDstPack->xHead))) {
         /* В буфере есть необходимое количество байт, требуется выполнить
-         * копирование сообщения в целевую область памяти */
+         * копирование сообщения в целевую область памяти через peek —
+         * чтобы при невалидной CRC можно было пропустить только заголовок */
 
         pDstPack->xHead.uFirstByte  = rmpSTART_FRAME_FIRST_BYTE;
         pDstPack->xHead.uSecondByte = rmpSTART_FRAME_SECOND_BYTE;
-        RMP_Get(
-            vObj,
+        lwrb_peek(
+            &hObj->xLWRB,
+            0,
             &pDstPack->xPLoad,
             hObj->uOneMessageSize - sizeof(pDstPack->xHead));
 
-        /* Сообщение найдено и скопировано, необходимо перейти в режим
-         * поиска первого байта независимо от того достоверна контрольная сумма
-         * или нет */
-        RMP_SetState(vObj, rmpSTATE_FIND_FIRST_BYTE);
-        /*--------------------------------------------------------------------*/
-
         if (RMP_IsCrcValid(vObj, (void *) pDst)) {
+            /* CRC валидна — пропускаем payload из буфера, сообщение скопировано */
+            lwrb_skip(
+                &hObj->xLWRB,
+                hObj->uOneMessageSize - sizeof(pDstPack->xHead));
             eReturnCode = rmpMESSAGE_COPIED;
+        } else {
+            /* CRC невалидна — заголовок уже удалён из буфера в FindStartFrame,
+             * payload остаётся в буфере, продолжаем поиск кадра */
+            eReturnCode = rmpIN_PROGRESS;
         }
 
-        /* if (uCrc
-            == pDstIdx[rmpONE_MESSAGE_SIZE_IN_BYTES - rmpCRC_SIZE_IN_BYTES]) */
+        /* Независимо от результата CRC переходим в поиск стартового кадра */
+        RMP_SetState(vObj, rmpSTATE_FIND_START_FRAME);
     }
     /** if ((uDstMemSize >= rmpONE_MESSAGE_SIZE_IN_BYTES)
         && (lwrb_get_full(&hObj->xLWRB)
@@ -246,7 +219,7 @@ RMP_IsCrcValid(void *vObj, void *pvMessage)
         bIsCrcValid = true;
     }
 
-    return bIsCrcValid;
+    return (bIsCrcValid);
 }
 
 size_t

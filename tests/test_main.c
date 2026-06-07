@@ -266,7 +266,7 @@ START_TEST(SetNewState)
     ck_assert_uint_eq(false, RMP_SetState(hAPI, rmpSTATE_MAX_NUMB + 1));
     ck_assert_uint_eq(false, RMP_SetState(hAPI, -1));
 
-    ck_assert_uint_eq(true, RMP_SetState(hAPI, rmpSTATE_FIND_FIRST_BYTE));
+    ck_assert_uint_eq(true, RMP_SetState(hAPI, rmpSTATE_FIND_START_FRAME));
 }
 
 START_TEST(StateFindStartFrame)
@@ -287,8 +287,10 @@ START_TEST(StateFindStartFrame)
 
         hAPI->Put(hAPI, (void *) ucMessage, sizeof(ucMessage));
 
-        ck_assert_uint_eq(rmpIN_PROGRESS, RMP_FindFirstByte(hAPI, NULL, 0));
-        ck_assert_uint_eq(rmpIN_PROGRESS, RMP_FindSecondByte(hAPI, NULL, 0));
+        ck_assert_uint_eq(
+            rmpIN_PROGRESS, RMP_FindStartFrame(hAPI, NULL, 0));
+        ck_assert_uint_eq(
+            rmpSTATE_WAIT_AND_COPY_MESSAGE, RMP_GetState(hAPI));
     } while (0);
     /*------------------------------------------------------------------------*/
 
@@ -309,8 +311,8 @@ START_TEST(StateFindStartFrame)
 
         hAPI->Put(hAPI, (void *) ucMessage, sizeof(ucMessage));
 
-        ck_assert_uint_eq(rmpIN_PROGRESS, RMP_FindFirstByte(hAPI, NULL, 0));
-        ck_assert_uint_eq(rmpIN_PROGRESS, RMP_FindSecondByte(hAPI, NULL, 0));
+        ck_assert_uint_eq(rmpBREAK, RMP_FindStartFrame(hAPI, NULL, 0));
+        ck_assert_uint_eq(rmpSTATE_FIND_START_FRAME, RMP_GetState(hAPI));
     } while (0);
     /*------------------------------------------------------------------------*/
 }
@@ -337,7 +339,7 @@ START_TEST(FindStartFrameAndCopyMessage)
 
         ck_assert_mem_eq(uaSrcMem, (void *) &xDstMem, sizeof(xDstMem));
 
-        ck_assert_uint_eq(rmpSTATE_FIND_FIRST_BYTE, RMP_GetState(hAPI));
+        ck_assert_uint_eq(rmpSTATE_FIND_START_FRAME, RMP_GetState(hAPI));
     } while (0);
 }
 
@@ -471,11 +473,11 @@ START_TEST(Reset)
     ck_assert_ptr_nonnull(hAPI);
     ck_assert_ptr_nonnull(hAPI->Reset);
 
-    RMP_SetState(hAPI, rmpSTATE_FIND_SECOND_BYTE);
+    RMP_SetState(hAPI, rmpSTATE_WAIT_AND_COPY_MESSAGE);
 
     hAPI->Reset(hAPI);
 
-    ck_assert_uint_eq(rmpSTATE_FIND_FIRST_BYTE, RMP_GetState(hAPI));
+    ck_assert_uint_eq(rmpSTATE_FIND_START_FRAME, RMP_GetState(hAPI));
 }
 
 START_TEST(JoyCommand)
@@ -488,7 +490,7 @@ START_TEST(JoyCommand)
     ck_assert_ptr_nonnull(hAPI->Reset);
 
     hAPI->Put(hAPI, (void *) uaPackDef, sizeof(uaPackDef));
-    RMP_SetState(hAPI, rmpSTATE_FIND_FIRST_BYTE);
+    RMP_SetState(hAPI, rmpSTATE_FIND_START_FRAME);
 
     uint8_t xDstMem[RMP_GetMessageSize(hAPI)];
     size_t  uReceiverMessageSize =
@@ -754,7 +756,7 @@ START_TEST(WaitAndCopyMessageInsufficientData)
     ck_assert_mem_eq(uaSrcMem, (void *) &xDstMem, sizeof(xDstMem));
 }
 
-START_TEST(FindFirstByteThreshold)
+START_TEST(FindStartFrameThreshold)
 {
     hAPI->Reset(hAPI);
 
@@ -765,14 +767,14 @@ START_TEST(FindFirstByteThreshold)
     }
     hAPI->Put(hAPI, uaGarbage, sizeof(uaGarbage));
 
-    /* Порог по умолчанию 40, должны прочитать ровно 40 байт и остановиться */
-    ck_assert_uint_eq(rmpBREAK, RMP_FindFirstByte(hAPI, NULL, 0));
+    /* Порог по умолчанию 40, должны пропустить ровно 40 байт и остановиться */
+    ck_assert_uint_eq(rmpBREAK, RMP_FindStartFrame(hAPI, NULL, 0));
 
     /* В буфере осталось 10 байт */
     ck_assert_uint_eq(10u, hAPI->Reset(hAPI));
 }
 
-START_TEST(FindFirstByteNoStartByte)
+START_TEST(FindStartFrameNoStartByte)
 {
     hAPI->Reset(hAPI);
 
@@ -782,10 +784,80 @@ START_TEST(FindFirstByteNoStartByte)
     }
     hAPI->Put(hAPI, uaGarbage, sizeof(uaGarbage));
 
-    ck_assert_uint_eq(rmpBREAK, RMP_FindFirstByte(hAPI, NULL, 0));
+    ck_assert_uint_eq(rmpBREAK, RMP_FindStartFrame(hAPI, NULL, 0));
 
     /* Все байты прочитаны */
     ck_assert_uint_eq(0u, hAPI->Reset(hAPI));
+}
+
+START_TEST(FalseStartDoubleAaThenValid)
+{
+    hAPI->Reset(hAPI);
+
+    uint8_t uaSrcMem[RMP_GetMessageSize(hAPI)];
+    memset(uaSrcMem, 0, sizeof(uaSrcMem));
+    uaSrcMem[0] = rmpSTART_FRAME_FIRST_BYTE;
+    uaSrcMem[1] = rmpSTART_FRAME_SECOND_BYTE;
+    uaSrcMem[2] = 88;
+    RMP_WriteCrcInMessageTail(hAPI, (void *) uaSrcMem);
+
+    uint8_t uaStream[64] = {0};
+    /* Ложный старт: 0xAA без 0x55, затем сразу валидный 0xAA 0x55 */
+    uaStream[0] = rmpSTART_FRAME_FIRST_BYTE;
+    uaStream[1] = rmpSTART_FRAME_FIRST_BYTE; /* не 0x55! */
+    memcpy(&uaStream[2], uaSrcMem, sizeof(uaSrcMem));
+
+    hAPI->Put(hAPI, uaStream, 2 + sizeof(uaSrcMem));
+
+    uint8_t xDstMem[RMP_GetMessageSize(hAPI)];
+    size_t  uRxMessageSize =
+        hAPI->Processing(hAPI, (void *) &xDstMem, sizeof(xDstMem));
+    ck_assert_uint_eq(RMP_GetMessageSize(hAPI), uRxMessageSize);
+    ck_assert_mem_eq(uaSrcMem, (void *) &xDstMem, sizeof(xDstMem));
+}
+
+START_TEST(InvalidCrcThenValidMessageInPayload)
+{
+    hAPI->Reset(hAPI);
+
+    /* Формируем валидное сообщение */
+    uint8_t uaValidMsg[RMP_GetMessageSize(hAPI)];
+    memset(uaValidMsg, 0, sizeof(uaValidMsg));
+    uaValidMsg[0] = rmpSTART_FRAME_FIRST_BYTE;
+    uaValidMsg[1] = rmpSTART_FRAME_SECOND_BYTE;
+    uaValidMsg[2] = 42;
+    RMP_WriteCrcInMessageTail(hAPI, (void *) uaValidMsg);
+
+    /* Создаём поток: невалидное "сообщение" (0xAA 0x55 в середине мусора)
+     * за которым следует валидное сообщение.
+     * Невалидное "сообщение" — это 20 байт мусора, начинающихся с 0xAA 0x55,
+     * но с невалидной CRC. За ним — валидное сообщение. */
+    uint8_t uaStream[128] = {0};
+    size_t  uOffset       = 0;
+
+    /* Невалидный "заголовок" в середине мусора — 0xAA 0x55 + мусор */
+    uaStream[uOffset++] = rmpSTART_FRAME_FIRST_BYTE;
+    uaStream[uOffset++] = rmpSTART_FRAME_SECOND_BYTE;
+    /* Остальное — мусор (CRC будет невалидна) */
+    for (size_t i = 2; i < RMP_GetMessageSize(hAPI); ++i) {
+        uaStream[uOffset++] = (uint8_t) (i + 100);
+    }
+
+    /* За невалидным "сообщением" — валидное */
+    memcpy(&uaStream[uOffset], uaValidMsg, sizeof(uaValidMsg));
+    uOffset += sizeof(uaValidMsg);
+
+    hAPI->Put(hAPI, uaStream, uOffset);
+
+    /* Первый вызов Processing должен пропустить невалидное сообщение
+     * и найти валидное */
+    uint8_t xDstMem[RMP_GetMessageSize(hAPI)];
+    size_t  uRxMessageSize =
+        hAPI->Processing(hAPI, (void *) &xDstMem, sizeof(xDstMem));
+
+    /* Ожидаем, что валидное сообщение будет найдено */
+    ck_assert_uint_eq(RMP_GetMessageSize(hAPI), uRxMessageSize);
+    ck_assert_mem_eq(uaValidMsg, (void *) &xDstMem, sizeof(xDstMem));
 }
 
 int
@@ -856,8 +928,10 @@ main(int argc, char *argv[], char *envp[])
         tcase_add_test(tc, ResetNonEmptyBuffer);
         tcase_add_test(tc, FalseStartThenValidMessage);
         tcase_add_test(tc, WaitAndCopyMessageInsufficientData);
-        tcase_add_test(tc, FindFirstByteThreshold);
-        tcase_add_test(tc, FindFirstByteNoStartByte);
+        tcase_add_test(tc, FindStartFrameThreshold);
+        tcase_add_test(tc, FindStartFrameNoStartByte);
+        tcase_add_test(tc, FalseStartDoubleAaThenValid);
+        tcase_add_test(tc, InvalidCrcThenValidMessageInPayload);
 
         /* Добавить тестовый набор к тестовому объекту */
         suite_add_tcase(s, tc);
