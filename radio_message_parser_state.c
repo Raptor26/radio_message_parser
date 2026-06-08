@@ -43,9 +43,6 @@ RMP_FindStartFrame(void *vObj, void *pDst, size_t uDstMemSize);
 rmpPRIVATE rmp_return_code
 RMP_WaitAndCopyMessage(void *vObj, void *pDst, size_t uDstMemSize);
 
-rmpPRIVATE size_t
-RMP_Get(void *vObj, void *pDst, size_t uDstMemSize);
-
 bool
 RMP_SetState(void *vObj, rmp_state_e eNewState);
 
@@ -59,7 +56,7 @@ RMP_GetPackCrc(void *vObj, void *pvMessage);
 rmp_state_api_handle_t
 RMP_InitStateAPI(void *vObj)
 {
-    rmp_data_handle_t hObj = (rmp_data_handle_t) vObj;
+    rmp_data_handle_t hObj                         = (rmp_data_handle_t) vObj;
 
     hObj->xStateAPI.aFn[rmpSTATE_FIND_START_FRAME] = RMP_FindStartFrame;
 
@@ -75,10 +72,10 @@ RMP_FindStartFrame(void *vObj, void *pDst, size_t uDstMemSize)
     (void) pDst;
     (void) uDstMemSize;
 
-    rmp_data_handle_t hObj          = (rmp_data_handle_t) vObj;
-    rmp_return_code   eReturnCode   = rmpBREAK;
+    rmp_data_handle_t hObj        = (rmp_data_handle_t) vObj;
+    rmp_return_code   eReturnCode = rmpBREAK;
 
-    size_t            uBytesSkipped = 0u;
+    size_t uBytesSkipped          = 0u;
 
     /* Поиск стартового кадра через peek — без удаления байт из буфера
      * до подтверждения валидности заголовка */
@@ -146,7 +143,8 @@ RMP_WaitAndCopyMessage(void *vObj, void *pDst, size_t uDstMemSize)
             hObj->uOneMessageSize - sizeof(pDstPack->xHead));
 
         if (RMP_IsCrcValid(vObj, (void *) pDst)) {
-            /* CRC валидна — пропускаем payload из буфера, сообщение скопировано */
+            /* CRC валидна — пропускаем payload из буфера, сообщение скопировано
+             */
             lwrb_skip(
                 &hObj->xLWRB,
                 hObj->uOneMessageSize - sizeof(pDstPack->xHead));
@@ -235,14 +233,6 @@ RMP_GetMessageSize(void *vObj)
 {
     rmp_data_handle_t hObj = (rmp_data_handle_t) vObj;
     return hObj->uOneMessageSize;
-}
-
-rmpPRIVATE size_t
-RMP_Get(void *vObj, void *pDst, size_t uDstMemSize)
-{
-    rmp_data_handle_t hObj = (rmp_data_handle_t) vObj;
-
-    return (lwrb_read(&hObj->xLWRB, pDst, uDstMemSize));
 }
 
 /**

@@ -217,49 +217,6 @@ START_TEST(CheckCrcValidation)
     ck_assert_uint_eq(true, RMP_IsCrcValid(hAPI, (void *) uaPackDef));
 }
 
-START_TEST(APIPutThenRead)
-{
-    const char *pSrc    = "Hello World!";
-    size_t      uSrlLen = strlen(pSrc);
-    ck_assert_uint_eq(uSrlLen, hAPI->Put(hAPI, (void *) pSrc, uSrlLen));
-
-    uint8_t uaDstStr[128] = {0};
-    ck_assert_uint_eq(
-        uSrlLen,
-        RMP_Get(hAPI, (void *) uaDstStr, sizeof(uaDstStr)));
-
-    ck_assert_str_eq(pSrc, (const char *) uaDstStr);
-}
-
-START_TEST(APIPutThenReadInCycle)
-{
-    const char  *pSrc                     = "Hello World!";
-    size_t       uSrlLen                  = strlen(pSrc);
-    const size_t uBytesNumbInOneIteration = 1u;
-
-    /* Побайтная запись сообщения в кольцевой буфер */
-    for (size_t i = 0; i < uSrlLen; ++i) {
-        size_t uWrittenBytesNumb =
-            hAPI->Put(hAPI, (void *) &pSrc[i], uBytesNumbInOneIteration);
-
-        ck_assert_uint_eq(uBytesNumbInOneIteration, uWrittenBytesNumb);
-    }
-    /*------------------------------------------------------------------------*/
-
-    uint8_t uaDstStr[48] = {0};
-
-    /* Побайтное чтение сообщения из кольцевого буфера */
-    for (size_t i = 0; i < uSrlLen; ++i) {
-        size_t uReadBytesNumb =
-            RMP_Get(hAPI, (void *) &uaDstStr[i], uBytesNumbInOneIteration);
-
-        ck_assert_uint_eq(uBytesNumbInOneIteration, uReadBytesNumb);
-    }
-    /*------------------------------------------------------------------------*/
-
-    ck_assert_str_eq(pSrc, (const char *) uaDstStr);
-}
-
 START_TEST(SetNewState)
 {
     ck_assert_uint_eq(false, RMP_SetState(hAPI, rmpSTATE_MAX_NUMB));
@@ -287,10 +244,8 @@ START_TEST(StateFindStartFrame)
 
         hAPI->Put(hAPI, (void *) ucMessage, sizeof(ucMessage));
 
-        ck_assert_uint_eq(
-            rmpIN_PROGRESS, RMP_FindStartFrame(hAPI, NULL, 0));
-        ck_assert_uint_eq(
-            rmpSTATE_WAIT_AND_COPY_MESSAGE, RMP_GetState(hAPI));
+        ck_assert_uint_eq(rmpIN_PROGRESS, RMP_FindStartFrame(hAPI, NULL, 0));
+        ck_assert_uint_eq(rmpSTATE_WAIT_AND_COPY_MESSAGE, RMP_GetState(hAPI));
     } while (0);
     /*------------------------------------------------------------------------*/
 
@@ -893,18 +848,6 @@ main(int argc, char *argv[], char *envp[])
         suite_add_tcase(s, tc);
     } while (0);
     /*------------------------------------------------------------------------*/
-
-    do {
-        /* Создать тестовый набор */
-        TCase *tc = tcase_create("Radio message parser API with fixture");
-        tcase_add_checked_fixture(tc, prvSetup, prvTeardown);
-
-        tcase_add_test(tc, APIPutThenRead);
-        tcase_add_test(tc, APIPutThenReadInCycle);
-
-        /* Добавить тестовый набор к тестовому объекту */
-        suite_add_tcase(s, tc);
-    } while (0);
 
     do {
         /* Создать тестовый набор */
